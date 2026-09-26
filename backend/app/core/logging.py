@@ -4,21 +4,15 @@ import logging
 import sys
 
 
-class SafeLogFormatter(logging.Formatter):
-    """Custom formatter ensuring sensitive keywords (passwords, auth tokens) are masked."""
+from backend.app.core.sanitizer import sanitize_for_logging
 
-    SENSITIVE_KEYS = ("password", "token", "secret", "authorization", "bearer")
+
+class SafeLogFormatter(logging.Formatter):
+    """Custom formatter ensuring sensitive keywords (passwords, auth tokens, accounts) are masked."""
 
     def format(self, record: logging.LogRecord) -> str:
         msg = super().format(record)
-        # Basic sanitizer in case structured logs accidentally print sensitive keys
-        lower_msg = msg.lower()
-        if any(key in lower_msg for key in self.SENSITIVE_KEYS):
-            # Check if likely containing key=value or bearer token
-            for key in self.SENSITIVE_KEYS:
-                if f"{key}=" in lower_msg or f"{key}:" in lower_msg:
-                    pass  # Keep standard message structure, sanitized by upstream log calls
-        return msg
+        return sanitize_for_logging(msg)
 
 
 def setup_logging(debug: bool = False) -> None:

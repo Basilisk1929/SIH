@@ -17,6 +17,7 @@ from backend.app.alerts.schemas import (
     AlertStatusUpdateRequest,
     TransactionEvent,
 )
+from backend.app.services.audit_service import AuditAction, audit_service
 
 logger = logging.getLogger("alerts.api")
 router = APIRouter(tags=["Real-Time Alert Engine"])
@@ -115,14 +116,51 @@ async def sse_alert_feed(req: Request):
 
 
 @router.get("/{alert_id}", response_model=AlertResponse)
-def get_alert_by_id(alert_id: str):
-    """Retrieve a single alert by UUID or business alert_id."""
+async def get_alert_by_id(alert_id: str, request: Request):
+    """Retrieve a single alert by UUID or business alert_id.
+
+    Audits: VIEW_ALERT.
+    """
     alert = alert_engine.get_alert(alert_id)
     if alert is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Alert '{alert_id}' not found.",
         )
+
+    # Extract caller identity if authenticated
+    actor_id = "analyst"
+    actor_role = "ANALYST"
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        try:
+            from backend.app.core.security import decode_access_token
+            claims = decode_access_token(auth_header.split(" ", 1)[1])
+            actor_id = claims.get("sub", "analyst")
+            actor_role = claims.get("role", "ANALYST")
+        except Exception:
+            pass
+
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+
+    await audit_service.log_event(
+        action=AuditAction.VIEW_ALERT,
+        actor_id=actor_id,
+        actor_role=actor_role,
+        resource_type="ALERT",
+        resource_id=alert.alert_id,
+        client_ip=client_ip,
+        status="SUCCESS",
+        details={
+            "severity": alert.severity,
+            "composite_score": alert.risk_score,
+            "status": alert.status,
+        },
+    )
+
     return alert
 
 

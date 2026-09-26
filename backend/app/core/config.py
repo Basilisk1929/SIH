@@ -25,6 +25,13 @@ def get_jwt_secret() -> str:
             if content:
                 return content
 
+    env_mode = os.getenv("ENVIRONMENT", "development").lower()
+    if env_mode in ("production", "prod", "staging"):
+        raise RuntimeError(
+            "FATAL SECURITY MISCONFIGURATION: JWT_SECRET_KEY must be provided via environment variable "
+            "or secret mount in production/staging environments. Ephemeral secret generation is prohibited."
+        )
+
     logging.warning(
         "JWT_SECRET_KEY not supplied. Generating ephemeral secret. "
         "Tokens will NOT persist across instance restarts or horizontal replicas!"
