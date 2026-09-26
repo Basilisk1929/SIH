@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cyber-intelligence-platform"
+version = "0.1.0"
+description = "Production-oriented Cybercrime Intelligence & Financial Transaction Risk Detection Platform (SIH Prototype)"
+authors = [
+    { name = "Lead Architect & SIH Core Engineering Team" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+    "sqlalchemy>=2.0.30",
+    "asyncpg>=0.29.0",
+    "neo4j>=5.20.0",
+    "redis>=5.0.4",
+    "passlib[bcrypt]>=1.7.4",
+    "pyjwt>=2.8.0",
+    "python-multipart>=0.0.9",
+    "httpx>=0.27.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP"]
+ignore = ["B008"] # Do not perform function call in argument defaults (FastAPI Depends pattern)
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
