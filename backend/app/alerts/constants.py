@@ -1,0 +1,60 @@
+"""Constants, severity tiers, state workflows, and evidentiary disclaimers for Alert Engine."""
+
+from typing import Dict, Set
+
+# Alert Severity Levels
+SEVERITY_LOW = "LOW"
+SEVERITY_MEDIUM = "MEDIUM"
+SEVERITY_HIGH = "HIGH"
+SEVERITY_CRITICAL = "CRITICAL"
+
+SEVERITY_LEVELS: Set[str] = {
+    SEVERITY_LOW,
+    SEVERITY_MEDIUM,
+    SEVERITY_HIGH,
+    SEVERITY_CRITICAL,
+}
+
+# Alert Workflow States
+STATE_NEW = "NEW"
+STATE_ACKNOWLEDGED = "ACKNOWLEDGED"
+STATE_INVESTIGATING = "INVESTIGATING"
+STATE_RESOLVED = "RESOLVED"
+STATE_FALSE_POSITIVE = "FALSE_POSITIVE"
+
+ALERT_STATES: Set[str] = {
+    STATE_NEW,
+    STATE_ACKNOWLEDGED,
+    STATE_INVESTIGATING,
+    STATE_RESOLVED,
+    STATE_FALSE_POSITIVE,
+}
+
+# Strict Alert State Transition Matrix
+VALID_STATE_TRANSITIONS: Dict[str, Set[str]] = {
+    STATE_NEW: {STATE_ACKNOWLEDGED, STATE_INVESTIGATING, STATE_FALSE_POSITIVE, STATE_RESOLVED},
+    STATE_ACKNOWLEDGED: {STATE_INVESTIGATING, STATE_RESOLVED, STATE_FALSE_POSITIVE},
+    STATE_INVESTIGATING: {STATE_RESOLVED, STATE_FALSE_POSITIVE, STATE_ACKNOWLEDGED},
+    STATE_RESOLVED: {STATE_INVESTIGATING},  # Re-open if new evidence surfaces
+    STATE_FALSE_POSITIVE: {STATE_INVESTIGATING},  # Re-evaluate if subsequent complaints link
+}
+
+# Standard Alert Types
+ALERT_TYPE_ML_RISK = "HIGH_ML_RISK"
+ALERT_TYPE_VELOCITY = "RAPID_VELOCITY"
+ALERT_TYPE_GRAPH = "SUSPICIOUS_GRAPH_CLUSTER"
+ALERT_TYPE_CASHOUT = "RAPID_CASHOUT"
+ALERT_TYPE_GEO = "GEOGRAPHIC_ANOMALY"
+ALERT_TYPE_COMPLAINT = "COMPLAINT_LINKAGE"
+ALERT_TYPE_COMPOSITE = "COMPOSITE_CYBER_FRAUD"
+
+# Default Configuration
+DEFAULT_DEDUP_WINDOW_SECONDS: int = 300  # 5 minutes
+DEFAULT_RATE_LIMIT_REQUESTS: int = 60
+DEFAULT_RATE_LIMIT_WINDOW: int = 60  # 1 minute
+
+# Statutory Regulatory & Evidentiary Disclaimer
+ALERT_DISCLAIMER: str = (
+    "Do not claim that an alert proves criminal activity. "
+    "It represents a model-generated risk signal for tactical intelligence and investigation."
+)

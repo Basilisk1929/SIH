@@ -8,6 +8,7 @@ from backend.app.api.v1.endpoints import (
     graph,
     health,
     transactions,
+    alerts,
 )
 
 api_router = APIRouter()
@@ -18,3 +19,4 @@ api_router.include_router(complaints.router, prefix="/complaints", tags=["NCRP/1
 api_router.include_router(transactions.router, prefix="/transactions", tags=["Financial Risk & Accounts"])
 api_router.include_router(graph.router, prefix="/graph", tags=["Mule Network Graph"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["Intelligence Analytics"])
+api_router.include_router(alerts.router, prefix="/alerts", tags=["Real-Time Alert Engine"])

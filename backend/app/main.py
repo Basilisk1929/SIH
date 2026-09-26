@@ -8,6 +8,7 @@ from typing import AsyncGenerator
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from backend.app.api.v1.endpoints import alerts
 from backend.app.api.v1.router import api_router
 from backend.app.core.config import settings
 from backend.app.core.logging import setup_logging
@@ -75,6 +76,8 @@ async def generic_exception_handler(request: Request, exc: Exception):
 
 # Mount central v1 API router
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+# Direct /alerts root mounting for prompt compliance
+app.include_router(alerts.router, prefix="/alerts")
 
 
 @app.get("/", tags=["Root"])
