@@ -156,9 +156,31 @@ Open [http://localhost:5173](http://localhost:5173) to view the workbench.
 
 ---
 
-## 5. Running Automated Tests
+## 5. Running Automated Tests & Data Validation
 
-Run the complete backend, ML, NLP, and graph test suite using `pytest`:
+### A. Synthetic Data Validation (Referential Integrity)
+Validate that all generated entities, accounts, transactions, and complaints satisfy 100% referential integrity and label consistency:
+```bash
+# Validate CSV files
+python3 data/validators/validate_referential_integrity.py csv
+
+# Validate Parquet files
+python3 data/validators/validate_referential_integrity.py parquet
+```
+
+### B. Generate Custom Dataset Scales (10K, 50K, 100K, 500K)
+```bash
+# 10K records (Default development scale)
+python3 data/generators/synthetic_generator.py --scale 10K --format both
+
+# 50K, 100K, or 500K production scale
+python3 data/generators/synthetic_generator.py --scale 50K --format both
+python3 data/generators/synthetic_generator.py --scale 100K --format both
+python3 data/generators/synthetic_generator.py --scale 500K --format both
+```
+
+### C. Automated Test Suite (Pytest)
+Run the complete backend, ML, NLP, graph, and data test suite using `pytest`:
 ```bash
 pytest tests/ -v
 ```
