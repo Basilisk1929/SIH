@@ -1,0 +1,84 @@
+{
+  "model_type": "XGBClassifier",
+  "version": "1.0.0",
+  "trained_at": "2026-09-26T07:39:40.557291+00:00",
+  "feature_names": [
+    "transaction_amount",
+    "transaction_frequency",
+    "transactions_last_1h",
+    "transactions_last_24h",
+    "unique_receivers",
+    "unique_senders",
+    "cashout_ratio",
+    "account_age",
+    "graph_degree",
+    "graph_centrality",
+    "complaint_link_count",
+    "geographic_distance"
+  ],
+  "feature_importances": {
+    "transaction_amount": 0.14300811290740967,
+    "transaction_frequency": 0.03566368669271469,
+    "transactions_last_1h": 0.29246190190315247,
+    "transactions_last_24h": 0.2505878508090973,
+    "unique_receivers": 0.027185019105672836,
+    "unique_senders": 0.05273062735795975,
+    "cashout_ratio": 0.06722782552242279,
+    "account_age": 0.02130396105349064,
+    "graph_degree": 0.02063761278986931,
+    "graph_centrality": 0.06328599900007248,
+    "complaint_link_count": 0.0,
+    "geographic_distance": 0.025907399132847786
+  },
+  "feature_medians": {
+    "transaction_amount": 8572.89,
+    "transaction_frequency": 0.11,
+    "transactions_last_1h": 0.0,
+    "transactions_last_24h": 0.0,
+    "unique_receivers": 1.0,
+    "unique_senders": 1.0,
+    "cashout_ratio": 0.0,
+    "account_age": 576.5,
+    "graph_degree": 2.0,
+    "graph_centrality": 0.0067,
+    "complaint_link_count": 0.0,
+    "geographic_distance": 897.11
+  },
+  "feature_stds": {
+    "transaction_amount": 14783.230455217701,
+    "transaction_frequency": 3.1533539790238247,
+    "transactions_last_1h": 0.1683368820501364,
+    "transactions_last_24h": 0.332457139771998,
+    "unique_receivers": 1.3311767161505415,
+    "unique_senders": 591.9027078827874,
+    "cashout_ratio": 0.2774807094936416,
+    "account_age": 8.664665776518461,
+    "graph_degree": 591.9815818474868,
+    "graph_centrality": 0.34700825008911473,
+    "complaint_link_count": 0.0001,
+    "geographic_distance": 612.4810437310919
+  },
+  "metrics": {
+    "precision": 0.8658,
+    "recall": 0.733,
+    "f1": 0.7938,
+    "roc_auc": 0.9674,
+    "pr_auc": 0.8268,
+    "confusion_matrix": [
+      [
+        4769,
+        20
+      ],
+      [
+        47,
+        129
+      ]
+    ],
+    "threshold": 0.5,
+    "sample_count": 4965,
+    "positive_count": 176
+  },
+  "train_samples": 23165,
+  "val_samples": 4964,
+  "test_samples": 4965
+}
