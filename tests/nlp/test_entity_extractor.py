@@ -14,7 +14,7 @@ def test_cybercrime_entity_extractor_finds_identifiers():
 
     assert "mule.88@oksbi" in entities["upi_ids"]
     assert "SBIN0001234" in entities["ifsc_codes"]
-    assert any("BijliUpdate.apk" in apk.lower() for apk in entities["apk_files"])
+    assert any("bijliupdate.apk" in apk.lower() for apk in entities["apk_files"])
     assert len(entities["phone_numbers"]) >= 1
 
 

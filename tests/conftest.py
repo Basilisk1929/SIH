@@ -1,6 +1,12 @@
-"""Pytest configuration and shared test fixtures."""
-
 import os
+import sys
+from pathlib import Path
+
+# Bootstrap workspace root into sys.path
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from backend.app.main import app
