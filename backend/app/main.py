@@ -11,12 +11,16 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from backend.app.api.v1.endpoints import accounts, alerts, auth, cases
+from backend.app.api.v1.endpoints import accounts, alerts, auth, cases, complaints, health, transactions
 from backend.app.api.v1.router import api_router
+from ml.api.routes import router as risk_router
+from geo.api.routes import router as geo_router
+from nlp.api.routes import router as nlp_router
 from backend.app.core.config import settings
 from backend.app.core.logging import setup_logging
 from backend.app.core.sanitizer import sanitize_for_logging
 from backend.app.db.neo4j import close_neo4j_driver
+
 
 logger = logging.getLogger("app.main")
 
@@ -31,6 +35,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await close_neo4j_driver()
 
 
+# Conditionally disable OpenAPI documentation in production/staging
+_is_prod = settings.ENVIRONMENT.lower() in ("production", "prod", "staging")
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -38,16 +45,22 @@ app = FastAPI(
         "Production-oriented Cybercrime Intelligence and Financial Transaction Risk "
         "Detection Platform (SIH Prototype). Evaluated strictly with synthetic datasets."
     ),
-    openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
-    docs_url=f"{settings.API_V1_PREFIX}/docs",
-    redoc_url=f"{settings.API_V1_PREFIX}/redoc",
+    openapi_url=None if _is_prod else f"{settings.API_V1_PREFIX}/openapi.json",
+    docs_url=None if _is_prod else f"{settings.API_V1_PREFIX}/docs",
+    redoc_url=None if _is_prod else f"{settings.API_V1_PREFIX}/redoc",
     lifespan=lifespan,
 )
 
-# CORS Middleware with strict origin allowlist
+# Enforce strict CORS policies (wildcards prohibited in production/staging)
+if settings.ENVIRONMENT.lower() in ("production", "prod", "staging") and "*" in settings.ALLOWED_CORS_ORIGINS:
+    raise RuntimeError(
+        "FATAL SECURITY MISCONFIGURATION: Wildcard CORS origin ('*') is strictly prohibited in production!"
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_CORS_ORIGINS,
+    allow_origin_regex=r"^https:\/\/([a-zA-Z0-9_-]+\.)?vercel\.app$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allow_headers=[
@@ -60,6 +73,7 @@ app.add_middleware(
         "X-RateLimit-Limit",
         "X-RateLimit-Remaining",
         "X-RateLimit-Reset",
+        "bypass-tunnel-reminder",
     ],
 )
 
@@ -153,10 +167,17 @@ async def generic_exception_handler(request: Request, exc: Exception):
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 # Direct root mountings for prompt compliance and dual routing
+app.include_router(health.router, prefix="/health")
 app.include_router(alerts.router, prefix="/alerts")
 app.include_router(auth.router, prefix="/auth")
 app.include_router(cases.router, prefix="/cases")
 app.include_router(accounts.router, prefix="/accounts")
+app.include_router(transactions.router, prefix="/transactions")
+app.include_router(complaints.router, prefix="/complaints")
+app.include_router(risk_router)
+app.include_router(geo_router)
+app.include_router(nlp_router)
+
 
 
 @app.get("/", tags=["Root"])

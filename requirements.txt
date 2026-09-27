@@ -1,0 +1,3 @@
+# CyberShield-Intel Root Requirements
+# References backend/requirements.txt which contains all application, ML, NLP, Geo, and testing packages.
+-r backend/requirements.txt

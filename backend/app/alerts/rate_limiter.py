@@ -58,7 +58,11 @@ def verify_rate_limit(
     window_seconds: int = DEFAULT_RATE_LIMIT_WINDOW,
 ) -> None:
     """FastAPI dependency to enforce request rate limits per client IP."""
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "127.0.0.1"
     key = f"{client_ip}:{request.url.path}"
 
     if not rate_limiter.is_allowed(key):

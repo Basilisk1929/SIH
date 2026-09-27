@@ -54,7 +54,7 @@ def test_all_eight_mandatory_audit_actions_captured():
             "ml_risk_score": 85.0,
         }
     }
-    create_alert_res = client.post("/alerts", json=alert_payload)
+    create_alert_res = client.post("/alerts", json=alert_payload, headers=active_inv_headers)
     assert create_alert_res.status_code == 201
     alert_id = create_alert_res.json()["alert_id"]
 

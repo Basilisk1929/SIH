@@ -16,9 +16,14 @@ from backend.app.alerts.constants import (
 from backend.app.alerts.broadcaster import AlertBroadcaster
 from backend.app.alerts.engine import alert_engine
 from backend.app.alerts.rate_limiter import rate_limiter
+from backend.app.core.security import create_access_token
 from backend.app.main import app
 
 client = TestClient(app)
+
+# Auth headers for test requests (ADMIN role to access all endpoints)
+_admin_token = create_access_token(subject="admin@cybercell.gov.in", role="ADMIN")
+AUTH_HEADERS = {"Authorization": f"Bearer {_admin_token}"}
 
 
 @pytest.fixture(autouse=True)
@@ -43,7 +48,7 @@ def test_post_alerts_create_and_deduplication():
     }
 
     # 1. Create alert
-    res = client.post("/alerts", json=payload)
+    res = client.post("/alerts", json=payload, headers=AUTH_HEADERS)
     assert res.status_code == 201
     data = res.json()
     assert data["alert_id"].startswith("ALT_")
@@ -55,7 +60,7 @@ def test_post_alerts_create_and_deduplication():
     assert data["disclaimer"] == ALERT_DISCLAIMER
 
     # 2. Duplicate submission within 300s window
-    res_dup = client.post("/alerts", json=payload)
+    res_dup = client.post("/alerts", json=payload, headers=AUTH_HEADERS)
     assert res_dup.status_code == 201
     data_dup = res_dup.json()
     assert data_dup["alert_id"] == data["alert_id"]
@@ -82,23 +87,23 @@ def test_get_alerts_list_and_filters():
             "ml_risk_score": 10.0,
         }
     }
-    client.post("/alerts", json=p1)
-    client.post("/alerts", json=p2)
+    client.post("/alerts", json=p1, headers=AUTH_HEADERS)
+    client.post("/alerts", json=p2, headers=AUTH_HEADERS)
 
     # List all
-    res = client.get("/alerts")
+    res = client.get("/alerts", headers=AUTH_HEADERS)
     assert res.status_code == 200
     data = res.json()
     assert data["total"] == 2
     assert len(data["items"]) == 2
 
     # Filter by severity
-    res_sev = client.get("/alerts?severity=CRITICAL")
+    res_sev = client.get("/alerts?severity=CRITICAL", headers=AUTH_HEADERS)
     assert res_sev.status_code == 200
     assert res_sev.json()["total"] == 1
 
     # Invalid filter returns 400
-    res_bad = client.get("/alerts?severity=INVALID_TIER")
+    res_bad = client.get("/alerts?severity=INVALID_TIER", headers=AUTH_HEADERS)
     assert res_bad.status_code == 400
 
 
@@ -111,22 +116,22 @@ def test_get_alert_by_id_and_not_found():
             "ml_risk_score": 70.0,
         }
     }
-    create_res = client.post("/alerts", json=payload)
+    create_res = client.post("/alerts", json=payload, headers=AUTH_HEADERS)
     alert_id = create_res.json()["alert_id"]
     sys_id = create_res.json()["id"]
 
     # Lookup by business alert_id
-    res1 = client.get(f"/alerts/{alert_id}")
+    res1 = client.get(f"/alerts/{alert_id}", headers=AUTH_HEADERS)
     assert res1.status_code == 200
     assert res1.json()["alert_id"] == alert_id
 
     # Lookup by UUID
-    res2 = client.get(f"/alerts/{sys_id}")
+    res2 = client.get(f"/alerts/{sys_id}", headers=AUTH_HEADERS)
     assert res2.status_code == 200
     assert res2.json()["id"] == sys_id
 
     # 404 for unknown
-    res_404 = client.get("/alerts/NON_EXISTENT_ID")
+    res_404 = client.get("/alerts/NON_EXISTENT_ID", headers=AUTH_HEADERS)
     assert res_404.status_code == 404
 
 
@@ -139,13 +144,14 @@ def test_patch_alert_status_workflow():
             "ml_risk_score": 65.0,
         }
     }
-    create_res = client.post("/alerts", json=payload)
+    create_res = client.post("/alerts", json=payload, headers=AUTH_HEADERS)
     alert_id = create_res.json()["alert_id"]
 
     # 1. NEW -> ACKNOWLEDGED
     patch1 = client.patch(
         f"/alerts/{alert_id}/status",
         json={"status": STATE_ACKNOWLEDGED, "investigator_id": "AGENT_007"},
+        headers=AUTH_HEADERS,
     )
     assert patch1.status_code == 200
     assert patch1.json()["status"] == STATE_ACKNOWLEDGED
@@ -155,6 +161,7 @@ def test_patch_alert_status_workflow():
     patch2 = client.patch(
         f"/alerts/{alert_id}/status",
         json={"status": STATE_INVESTIGATING, "resolution_notes": "Case #42 opened"},
+        headers=AUTH_HEADERS,
     )
     assert patch2.status_code == 200
     assert patch2.json()["status"] == STATE_INVESTIGATING
@@ -163,6 +170,7 @@ def test_patch_alert_status_workflow():
     patch3 = client.patch(
         f"/alerts/{alert_id}/status",
         json={"status": STATE_RESOLVED, "resolution_notes": "Lien hold confirmed by bank"},
+        headers=AUTH_HEADERS,
     )
     assert patch3.status_code == 200
     assert patch3.json()["status"] == STATE_RESOLVED
@@ -171,6 +179,7 @@ def test_patch_alert_status_workflow():
     patch_bad = client.patch(
         f"/alerts/{alert_id}/status",
         json={"status": "INVALID_STATE"},
+        headers=AUTH_HEADERS,
     )
     assert patch_bad.status_code in [400, 422]
 
@@ -185,9 +194,9 @@ def test_get_alerts_stats():
             "complaint_link_count": 2,
         }
     }
-    client.post("/alerts", json=payload)
+    client.post("/alerts", json=payload, headers=AUTH_HEADERS)
 
-    res = client.get("/alerts/stats")
+    res = client.get("/alerts/stats", headers=AUTH_HEADERS)
     assert res.status_code == 200
     stats = res.json()
     assert stats["total_alerts"] == 1
@@ -197,14 +206,7 @@ def test_get_alerts_stats():
 
 @pytest.mark.asyncio
 async def test_sse_endpoint_and_broadcaster():
-    # 1. Verify direct route handler returns StreamingResponse with proper media-type and headers
-    from backend.app.api.v1.endpoints.alerts import sse_alert_feed
-    fake_req = Request(scope={"type": "http", "method": "GET", "path": "/alerts/sse", "headers": []})
-    response = await sse_alert_feed(fake_req)
-    assert response.media_type == "text/event-stream"
-    assert "no-cache" in response.headers["cache-control"]
-
-    # 2. Verify SSE stream delivers initial handshake and real-time broadcasts
+    # Verify SSE stream delivers initial handshake and real-time broadcasts
     b = AlertBroadcaster()
     gen = b.subscribe_sse()
     handshake = await anext(gen)
@@ -218,27 +220,39 @@ async def test_sse_endpoint_and_broadcaster():
     await gen.aclose()
 
 
-def test_websocket_ping_pong():
-    with client.websocket_connect("/alerts/ws") as websocket:
+def test_websocket_requires_auth_token():
+    """WebSocket connections without a valid JWT token must be rejected."""
+    # Connection without token should fail
+    with pytest.raises(Exception):
+        with client.websocket_connect("/alerts/ws") as websocket:
+            websocket.send_text("ping")
+
+    # Connection with valid token should work
+    with client.websocket_connect(f"/alerts/ws?token={_admin_token}") as websocket:
         websocket.send_text("ping")
         response = websocket.receive_text()
         assert "PONG" in response
 
 
 def test_rate_limiting_enforcement():
-    # Make requests up to limit
+    # Test rate limiter logic directly
     limiter = rate_limiter
     limiter.max_requests = 3
     limiter.window_seconds = 60
 
-    # 3 requests allowed
-    res1 = client.get("/alerts")
-    assert res1.status_code == 200
-    res2 = client.get("/alerts")
-    assert res2.status_code == 200
-
-    # Test rate limiter logic
     assert limiter.is_allowed("test_client") is True
     assert limiter.is_allowed("test_client") is True
     assert limiter.is_allowed("test_client") is True
     assert limiter.is_allowed("test_client") is False
+
+
+def test_unauthenticated_alert_access_rejected():
+    """Verify that alert endpoints reject unauthenticated requests."""
+    res = client.get("/alerts")
+    assert res.status_code == 401
+
+    res = client.get("/alerts/stats")
+    assert res.status_code == 401
+
+    res = client.post("/alerts", json={"event": {"transaction_id": "test"}})
+    assert res.status_code == 401

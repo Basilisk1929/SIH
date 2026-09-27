@@ -1,5 +1,5 @@
 services:
-  # Relational Database: Structured Complaints, Transactions, Users, Audit Logs
+  # Relational Database: Structured Complaints, Transactions, Users, Cases, Audit Logs
   postgres:
     image: postgres:16-alpine
     container_name: cyber_intel_postgres
@@ -33,12 +33,13 @@ services:
       - "7687:7687" # Bolt Protocol
     volumes:
       - neo4j_data:/data
-      - ./docker/neo4j-init.cypher:/var/lib/neo4j/import/init.cypher:ro
+      - ./docker/neo4j-init.cypher:/var/lib/neo4j/import/init.cypher
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:7474"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 25s
 
   # In-Memory Cache & Message Broker: Real-time alerts, rate limits, async jobs
   redis:
@@ -65,16 +66,21 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENVIRONMENT=development
-      - DEBUG=True
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-True}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-cyber_admin}:${POSTGRES_PASSWORD:-cyber_dev_password_123!}@postgres:5432/${POSTGRES_DB:-cyber_intelligence_db}
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=${NEO4J_USER:-neo4j}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD:-cyber_graph_password_123!}
       - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev_insecure_jwt_secret_key_change_in_production_32bytes_minimum!}
+      - ALLOWED_CORS_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173","http://localhost:3000"]
+      - AUTO_SEED=true
       - SYNTHETIC_DATA_ONLY=True
     volumes:
       - ./backend:/app/backend
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
       - ./data:/app/data
       - ./ml:/app/ml
       - ./nlp:/app/nlp
@@ -94,12 +100,14 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
+      target: dev
     container_name: cyber_intel_frontend
     restart: unless-stopped
     ports:
       - "5173:5173"
     environment:
       - VITE_API_BASE_URL=http://localhost:8000/api/v1
+      - VITE_WS_ALERT_URL=ws://localhost:8000/alerts/ws
     volumes:
       - ./frontend:/app/frontend
       - /app/frontend/node_modules

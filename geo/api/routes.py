@@ -9,6 +9,11 @@ from geo.api.schemas import (
     SpatialRiskResponse,
 )
 from geo.intelligence import GeospatialIntelligenceEngine
+from geo.prediction.predictor import CashoutLocationPredictor
+from geo.prediction.schemas import (
+    CashoutPredictionRequest,
+    CashoutPredictionResponse,
+)
 
 router = APIRouter(prefix="/geo", tags=["Geospatial Intelligence"])
 _engine: Optional[GeospatialIntelligenceEngine] = None
@@ -120,6 +125,28 @@ def run_chicago_validation_benchmark():
     return engine.run_chicago_benchmark()
 
 
+@router.post("/predict-cashout-location", response_model=CashoutPredictionResponse)
+def predict_cashout_location(request: CashoutPredictionRequest):
+    """Predict and rank nearby operational RBI ATMs by likelihood of future cash-out activity."""
+    engine = get_engine()
+    predictor = CashoutLocationPredictor(rbi_registry=engine.rbi_registry, geo_engine=engine)
+    try:
+        return predictor.predict(request)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cashout prediction failure: {str(e)}")
+
+
+@router.get("/prediction/linkage-metadata")
+def get_synthetic_cashout_linkage_metadata():
+    """Retrieve explicit statutory data limitation metadata regarding synthetic PaySim-RBI ATM linkage."""
+    from geo.prediction.synthetic_linkage import SyntheticCashoutLinkage
+    engine = get_engine()
+    linkage = SyntheticCashoutLinkage(rbi_registry=engine.rbi_registry)
+    return linkage.get_metadata()
+
+
 @router.get("/health")
 def health_check():
     """Geospatial Intelligence service health verification."""
@@ -128,4 +155,5 @@ def health_check():
         "service": "Geospatial Intelligence Engine",
         "spatial_indexing": "H3 v4",
         "clustering_algorithm": "scikit-learn DBSCAN (haversine)",
+        "prediction_subsystem": "Cash-Out Location Prediction Engine (RBI-linked)",
     }

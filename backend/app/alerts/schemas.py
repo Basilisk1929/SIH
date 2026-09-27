@@ -108,6 +108,7 @@ class AlertResponse(BaseModel):
     duplicate_count: int = Field(1, description="Number of identical events seen in deduplication window")
     investigator_id: Optional[str] = None
     resolution_notes: Optional[str] = None
+    linked_case_id: Optional[str] = None
     created_at: str
     updated_at: str
     disclaimer: str = Field(default=ALERT_DISCLAIMER)

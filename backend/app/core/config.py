@@ -3,7 +3,8 @@
 import logging
 import os
 import secrets
-from typing import List
+from typing import Any, List
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -55,14 +56,38 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     API_V1_PREFIX: str = "/api/v1"
 
-    # Server Bindings
-    BACKEND_HOST: str = "127.0.0.1"
-    BACKEND_PORT: int = 8000
+    # Server Bindings (PORT env var is set by Render/Railway at runtime)
+    BACKEND_HOST: str = "0.0.0.0"
+    BACKEND_PORT: int = int(os.getenv("PORT", "8000"))
     ALLOWED_CORS_ORIGINS: List[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+        "https://frontend-bay-tau-86.vercel.app",
     ]
+
+    @field_validator("ALLOWED_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Any) -> List[str]:
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    import json
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed if str(item).strip()]
+                except Exception:
+                    pass
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        elif isinstance(v, (list, tuple)):
+            return [str(item).strip() for item in v if str(item).strip()]
+        return v
+
+    # Auto-seed database with synthetic records on startup if requested
+    AUTO_SEED: bool = False
 
     # Security & JWT
     JWT_SECRET_KEY: str = ""
@@ -74,15 +99,30 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "cyber_intelligence_db"
     POSTGRES_USER: str = "cyber_admin"
-    POSTGRES_PASSWORD: str = "cyber_dev_password_123!"
-    DATABASE_URL: str = (
-        "postgresql+asyncpg://cyber_admin:cyber_dev_password_123!@localhost:5432/cyber_intelligence_db"
-    )
+    POSTGRES_PASSWORD: str = ""  # MUST be set via environment variable (never hardcode)
+    DATABASE_URL: str = ""  # MUST be set via environment variable
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: Any) -> str:
+        """Normalize cloud-provider DATABASE_URL formats for asyncpg compatibility.
+
+        Render provides `postgres://...` but SQLAlchemy asyncpg requires
+        `postgresql+asyncpg://...`. This validator handles the conversion automatically.
+        """
+        if not v or not isinstance(v, str):
+            return v or ""
+        url = v.strip()
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
 
     # Neo4j Graph Database
     NEO4J_URI: str = "bolt://localhost:7687"
     NEO4J_USER: str = "neo4j"
-    NEO4J_PASSWORD: str = "cyber_graph_password_123!"
+    NEO4J_PASSWORD: str = ""  # MUST be set via environment variable (never hardcode)
 
     # Redis Cache
     REDIS_HOST: str = "localhost"
@@ -103,3 +143,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

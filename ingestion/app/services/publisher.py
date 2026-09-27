@@ -3,7 +3,11 @@
 import json
 import logging
 from typing import Any, Dict, List, Optional
-from aiokafka import AIOKafkaProducer
+try:
+    from aiokafka import AIOKafkaProducer
+except ImportError:
+    AIOKafkaProducer = None  # type: ignore
+
 from ingestion.app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -13,14 +17,14 @@ class KafkaEventPublisher:
     """Publishes validated and normalized events to Kafka topics."""
 
     def __init__(self):
-        self.producer: Optional[AIOKafkaProducer] = None
+        self.producer: Optional[Any] = None
         self.is_connected = False
         self.local_buffer: List[Dict[str, Any]] = []  # Fallback for local tests / offline Kafka
 
     async def start(self):
         """Initialize Kafka async producer connection."""
-        if not settings.KAFKA_ENABLED:
-            logger.info("Kafka publishing disabled via configuration. Using in-memory event buffer.")
+        if not settings.KAFKA_ENABLED or AIOKafkaProducer is None:
+            logger.info("Kafka publishing disabled or aiokafka not installed. Using in-memory event buffer.")
             return
 
         try:

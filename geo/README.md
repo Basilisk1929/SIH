@@ -97,6 +97,34 @@ The module exports RFC 7946 compliant GeoJSON (`[longitude, latitude]` coordinat
 
 ---
 
+### 9. Cash-Out Location Prediction Subsystem (`geo.prediction`)
+- **Predictive Ranking Engine**: Given a suspicious mule account and its recent transaction history, ranks nearby operational RBI ATM outlets by predicted likelihood of being a future physical cash-out destination.
+- **5-Stage Decision Support Pipeline**:
+  1. *Anchor Resolution & Candidate Generation*: Resolves geographic center of activity (explicit GPS coordinates, latest georeferenced transaction, or transaction centroid) and queries candidate operational ATMs within a configurable radius ($1$ to $50$ km, default $15$ km).
+  2. *Strict Spatial Filtering*: Enforces Indian territorial bounds via `CoordinateValidator(require_india=True)`, operational status (`is_operational == True`), and active cash dispensing (`cash_dispenser_active == True`).
+  3. *Multi-Dimensional Feature Engineering*:
+     - Haversine distance decay from recent account activity ($\lambda = 2.5$ km).
+     - Proximity to prior known cash-out locations in account history.
+     - Spatial cybercrime risk of the ATM's H3 cell ($0$–$100$).
+     - Local cash-out frequency and DBSCAN cybercrime corridor proximity (`is_hotspot_adjacent`).
+     - Outlet infrastructure suitability (Cash Recyclers [CRMs] / 24/7 Off-Site ATMs vs branch counters).
+     - Time-of-day nocturnal fit and weekend closure surge patterns.
+     - Urgent transaction burst multiplier ($>4$ txns/1h, cashout ratio $>0.7$).
+  4. *Calibrated Scoring & Monotonic Ranking*: Generates normalized prediction scores in $[5.0, 98.5]$ and assigns strict 1-indexed relative priority ranks.
+  5. *Natural Language Explanation Generation*: Emits evidentiary, human-readable tactical bullet points explaining the ranking of each ATM.
+
+---
+
+## 2. Visualizable RFC 7946 GeoJSON Output
+
+The module exports RFC 7946 compliant GeoJSON (`[longitude, latitude]` coordinate ordering) directly viewable in map renderers:
+
+- **H3 Hexagonal Polygons (`GET /geo/geojson/h3-cells`)**: Polygons with 7 closed vertices and properties containing risk scores, counts, and nearest ATMs.
+- **Hotspot Clusters (`GET /geo/geojson/hotspots`)**: Centroid Points and Convex Hull Polygons for active DBSCAN clusters.
+- **RBI ATM Network (`GET /geo/geojson/atms`)**: Points representing banking outlets and cash recyclers.
+
+---
+
 ## 3. REST API Specification
 
 Start the standalone geospatial microservice:
@@ -107,47 +135,7 @@ uvicorn geo.api.service:app --host 127.0.0.1 --port 8005
 ### Endpoints
 
 #### 1. `POST /geo/cell-analysis`
-**Request:**
-```json
-{
-  "h3_cell": "873ca91adffffff"
-}
-```
-
-**Response:**
-```json
-{
-  "h3_cell": "873ca91adffffff",
-  "latitude": 23.958068,
-  "longitude": 86.80196,
-  "transaction_count": 0,
-  "complaint_count": 564,
-  "fraud_count": 0,
-  "fraud_ratio": 0.0,
-  "total_transaction_amount": 0.0,
-  "total_complaint_loss": 29343613.69,
-  "risk_score": 50.0,
-  "risk_band": "MEDIUM",
-  "hotspot_cluster": 0,
-  "nearest_atms": [
-    {
-      "outlet_id": "RBI_OUTLET_000177",
-      "bank_name": "State Bank of India",
-      "bank_code": "SBI",
-      "outlet_type": "ON_SITE_ATM",
-      "city": "Jamtara-Karmatanr",
-      "district": "Jamtara",
-      "state": "Jharkhand",
-      "distance_km": 0.45,
-      "distance_meters": 450.2
-    }
-  ],
-  "dominant_scam_type": "phishing",
-  "nearest_cyber_hub": "Jamtara-Karmatanr Hub",
-  "distance_to_cyber_hub_km": 0.37,
-  "disclaimer": "Do not claim that a geospatial risk score or hotspot cluster proves criminal activity. It represents a model-generated spatial risk signal for tactical intelligence and investigation."
-}
-```
+Analyzes cyber risk, fraud volume, and nearest ATMs for an H3 cell.
 
 #### 2. `POST /geo/coordinate-analysis`
 Accepts `latitude`, `longitude`, and optional `resolution`, converts to H3 cell and returns the spatial risk analysis.
@@ -167,6 +155,65 @@ Returns visualizable GeoJSON FeatureCollection of hexagonal risk cells.
 #### 7. `GET /geo/validation/chicago-benchmark`
 Executes spatial algorithm methodology verification on the Chicago validation benchmark.
 
+#### 8. `POST /geo/predict-cashout-location`
+Predicts and ranks candidate RBI ATMs for an investigated account.
+
+**Request:**
+```json
+{
+  "account_id": "SYN1000004465",
+  "current_latitude": 28.6280,
+  "current_longitude": 77.3649,
+  "candidate_radius_km": 10.0,
+  "top_k": 3,
+  "account_risk_score": 92.0,
+  "cashout_ratio": 0.94,
+  "transactions_last_1h": 8
+}
+```
+
+**Response:**
+```json
+{
+  "account_id": "SYN1000004465",
+  "prediction_timestamp": "2026-09-26T13:45:00+00:00",
+  "anchor_location": {
+    "latitude": 28.628,
+    "longitude": 77.3649,
+    "source": "explicit_current_location"
+  },
+  "candidate_radius_km": 10.0,
+  "total_candidates_evaluated": 16,
+  "predicted_atms": [
+    {
+      "atm_id": "RBI_OUTLET_000099",
+      "bank_name": "State Bank of India",
+      "latitude": 28.6289,
+      "longitude": 77.3655,
+      "distance_km": 0.12,
+      "prediction_score": 88.6,
+      "rank": 1,
+      "explanations": [
+        "Close to recent account activity (0.1 km)",
+        "Elevated cash-out activity in H3 cell 873da1146ffffff (Risk score: 85.0)",
+        "Located in known cybercrime surveillance corridor (Noida Sector-62)",
+        "High-throughput 24/7 cash recycler (CRM) with elevated withdrawal limits",
+        "Current transaction burst (8 txns in last 1h) indicates urgent cash-out dissipation"
+      ],
+      "outlet_type": "CASH_RECYCLER",
+      "city": "Noida Sector-62",
+      "district": "Gautam Buddha Nagar",
+      "state": "Uttar Pradesh"
+    }
+  ],
+  "urgency_level": "CRITICAL",
+  "disclaimer": "DISCLAIMER & DATA LIMITATION: This cash-out location prediction model is an investigative prototype evaluated on synthetic financial transactions and Reserve Bank of India (RBI) ATM outlet registries. PaySim and synthetic transaction benchmarks do not contain genuine Indian ATM-level destination identifiers. Predictions represent tactical likelihood ranking based on spatial proximity, H3 cybercrime cell risk, outlet accessibility, and transaction velocity. It must NOT be claimed that this prediction identifies the actual ATM used for criminal cash withdrawal."
+}
+```
+
+#### 9. `GET /geo/prediction/linkage-metadata`
+Retrieves explicit dataset limitation notice confirming synthetic PaySim-RBI linkage and prototype status.
+
 ---
 
 ## 4. Statutory & Evidentiary Disclaimer
@@ -174,8 +221,10 @@ Executes spatial algorithm methodology verification on the Chicago validation be
 > [!IMPORTANT]
 > **Evidentiary Notice**:
 > *"Do not claim that a geospatial risk score or hotspot cluster proves criminal activity. It represents a model-generated spatial risk signal for tactical intelligence and investigation."*
-> 
-> Spatial scores, H3 densities, and DBSCAN clusters emitted by this engine provide investigative prioritization for Law Enforcement Agencies (LEAs), cyber monitoring units, and banking fraud cells. They do not constitute statutory proof of guilt or penal liability without independent corroborative evidence, tower CDR verification, and certified bank statements (Section 65B Indian Evidence Act).
+
+> [!WARNING]
+> **Dataset Limitation Notice**:
+> *PaySim and open fraud datasets do NOT provide genuine Indian ATM-level destination data. This system utilizes a transparent, clearly labelled synthetic linkage between synthetic cash-out transaction events and real operational RBI ATM outlets. Predictions represent tactical likelihood prioritization and must NEVER be claimed as proof that a suspect withdrew funds from a specific physical ATM.*
 
 ---
 
@@ -185,4 +234,4 @@ Run all geospatial unit and integration tests:
 ```bash
 pytest tests/geo/ -v
 ```
-All **41 geospatial tests** pass in ~1.7s, with **144 tests passing monorepo-wide**.
+All **57 geospatial tests** pass in ~1.2s, with **216 tests passing monorepo-wide** (100% pass rate).

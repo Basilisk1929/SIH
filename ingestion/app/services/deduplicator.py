@@ -82,9 +82,15 @@ class DuplicateDetector:
 
         return False, fingerprint
 
+    def is_duplicate(self, entity_type: str, record_id: str, record: Dict[str, Any]) -> bool:
+        """Convenience method checking whether a record is a duplicate."""
+        is_dup, _ = self.check_and_record(entity_type, record)
+        return is_dup
+
     def clear(self):
         """Clear cache (primarily for test resets)."""
         self._seen_fingerprints.clear()
+
 
 
 # Global singleton instance

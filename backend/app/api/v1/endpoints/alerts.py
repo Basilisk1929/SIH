@@ -1,7 +1,7 @@
 """FastAPI router for Real-Time Alert Engine endpoints, WebSockets, and Server-Sent Events."""
 
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import StreamingResponse
 
@@ -17,14 +17,31 @@ from backend.app.alerts.schemas import (
     AlertStatusUpdateRequest,
     TransactionEvent,
 )
+from backend.app.core.security import (
+    Role,
+    decode_access_token,
+    get_current_user_claims,
+    require_roles,
+)
 from backend.app.services.audit_service import AuditAction, audit_service
 
 logger = logging.getLogger("alerts.api")
 router = APIRouter(tags=["Real-Time Alert Engine"])
 
 
-@router.post("", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)
-@router.post("/", response_model=AlertResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@router.post(
+    "",
+    response_model=AlertResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles([Role.ADMIN, Role.SUPERVISOR, Role.INVESTIGATOR]))],
+)
+@router.post(
+    "/",
+    response_model=AlertResponse,
+    status_code=status.HTTP_201_CREATED,
+    include_in_schema=False,
+    dependencies=[Depends(require_roles([Role.ADMIN, Role.SUPERVISOR, Role.INVESTIGATOR]))],
+)
 async def create_or_evaluate_alert(
     request: AlertCreateRequest,
     req_http: Request,
@@ -42,7 +59,7 @@ async def create_or_evaluate_alert(
         logger.error(f"Error evaluating alert: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Alert evaluation failure: {str(e)}",
+            detail="Alert evaluation failure. The incident has been logged.",
         )
 
 
@@ -54,6 +71,7 @@ def list_alerts(
     account_id: Optional[str] = Query(None, description="Filter by account number"),
     page: int = Query(1, ge=1, description="Page number (1-indexed)"),
     limit: int = Query(50, ge=1, le=100, description="Items per page"),
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
 ):
     """List alerts with filtering, reverse-chronological sorting, and pagination."""
     if severity and severity.upper() not in SEVERITY_LEVELS:
@@ -77,7 +95,9 @@ def list_alerts(
 
 
 @router.get("/stats", response_model=AlertStatsResponse)
-def get_alert_statistics():
+def get_alert_statistics(
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
+):
     """Retrieve operational dashboard counts by severity, status, and deduplication count."""
     return alert_engine.get_stats()
 
@@ -86,7 +106,25 @@ def get_alert_statistics():
 
 @router.websocket("/ws")
 async def websocket_alert_feed(websocket: WebSocket):
-    """WebSocket stream emitting real-time alert creations and state updates."""
+    """WebSocket stream emitting real-time alert creations and state updates.
+
+    Authentication: JWT token is validated from the 'token' query parameter.
+    Unauthenticated connections are rejected with WebSocket close code 4001.
+    """
+    # Validate JWT from query parameter (WebSocket doesn't support standard Authorization headers)
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=4001, reason="Authentication required")
+        return
+    try:
+        claims = decode_access_token(token)
+        if not claims.get("sub"):
+            await websocket.close(code=4001, reason="Invalid token claims")
+            return
+    except Exception:
+        await websocket.close(code=4001, reason="Invalid or expired token")
+        return
+
     await alert_broadcaster.connect_ws(websocket)
     try:
         while True:
@@ -102,8 +140,14 @@ async def websocket_alert_feed(websocket: WebSocket):
 
 
 @router.get("/sse")
-async def sse_alert_feed(req: Request):
-    """Server-Sent Events (SSE) stream for HTTP-based real-time dashboard listeners."""
+async def sse_alert_feed(
+    req: Request,
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
+):
+    """Server-Sent Events (SSE) stream for HTTP-based real-time dashboard listeners.
+
+    Requires Bearer token authentication.
+    """
     return StreamingResponse(
         alert_broadcaster.subscribe_sse(),
         media_type="text/event-stream",
@@ -116,10 +160,15 @@ async def sse_alert_feed(req: Request):
 
 
 @router.get("/{alert_id}", response_model=AlertResponse)
-async def get_alert_by_id(alert_id: str, request: Request):
+async def get_alert_by_id(
+    alert_id: str,
+    request: Request,
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
+):
     """Retrieve a single alert by UUID or business alert_id.
 
     Audits: VIEW_ALERT.
+    Requires authentication.
     """
     alert = alert_engine.get_alert(alert_id)
     if alert is None:
@@ -128,18 +177,8 @@ async def get_alert_by_id(alert_id: str, request: Request):
             detail=f"Alert '{alert_id}' not found.",
         )
 
-    # Extract caller identity if authenticated
-    actor_id = "analyst"
-    actor_role = "ANALYST"
-    auth_header = request.headers.get("Authorization", "")
-    if auth_header.startswith("Bearer "):
-        try:
-            from backend.app.core.security import decode_access_token
-            claims = decode_access_token(auth_header.split(" ", 1)[1])
-            actor_id = claims.get("sub", "analyst")
-            actor_role = claims.get("role", "ANALYST")
-        except Exception:
-            pass
+    actor_id = claims.get("sub", "analyst")
+    actor_role = claims.get("role", "ANALYST")
 
     client_ip = request.client.host if request.client else "127.0.0.1"
     forwarded = request.headers.get("X-Forwarded-For")
@@ -164,7 +203,11 @@ async def get_alert_by_id(alert_id: str, request: Request):
     return alert
 
 
-@router.patch("/{alert_id}/status", response_model=AlertResponse)
+@router.patch(
+    "/{alert_id}/status",
+    response_model=AlertResponse,
+    dependencies=[Depends(require_roles([Role.ADMIN, Role.SUPERVISOR, Role.INVESTIGATOR]))],
+)
 async def update_alert_status(
     alert_id: str,
     update_data: AlertStatusUpdateRequest,

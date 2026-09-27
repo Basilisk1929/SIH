@@ -9,6 +9,7 @@ if str(WORKSPACE_ROOT) not in sys.path:
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from backend.app.core.security import create_access_token
 from backend.app.main import app
 
 # Ensure testing environment flags are active
@@ -16,12 +17,22 @@ os.environ["ENVIRONMENT"] = "development"
 os.environ["SYNTHETIC_DATA_ONLY"] = "True"
 os.environ["DEBUG"] = "True"
 
+# Pre-generate auth token for test fixtures
+_test_admin_token = create_access_token(subject="admin@cybercell.gov.in", role="ADMIN")
+
 
 @pytest.fixture
 async def async_client():
-    """Async HTTP test client bound to ASGI app via localhost transport."""
+    """Async HTTP test client bound to ASGI app via localhost transport.
+
+    Includes JWT Authorization header for authenticated endpoint access.
+    """
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://127.0.0.1:8000") as client:
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://127.0.0.1:8000",
+        headers={"Authorization": f"Bearer {_test_admin_token}"},
+    ) as client:
         yield client
 
 

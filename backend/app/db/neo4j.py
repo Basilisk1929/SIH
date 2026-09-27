@@ -39,6 +39,17 @@ async def get_neo4j_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
+async def get_optional_neo4j_session() -> AsyncGenerator[AsyncSession | None, None]:
+    """Dependency that yields an active Neo4j session if accessible, else None."""
+    try:
+        driver = get_neo4j_driver()
+        async with driver.session() as session:
+            yield session
+    except Exception:
+        yield None
+
+
+
 async def check_neo4j_health() -> bool:
     """Verify connectivity to the Neo4j cluster."""
     try:

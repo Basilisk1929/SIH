@@ -8,7 +8,7 @@ from backend.app.models.account import Account, BankAccount
 from backend.app.models.atm import ATM
 from backend.app.models.transaction import Transaction
 from backend.app.models.complaint import Complaint
-from backend.app.models.case import Case
+from backend.app.models.case import Case, CaseEvidence, CaseNote, CaseTimelineEvent
 from backend.app.models.alert import Alert
 from backend.app.models.audit import AuditLog
 
@@ -25,6 +25,10 @@ __all__ = [
     "Transaction",
     "Complaint",
     "Case",
+    "CaseNote",
+    "CaseEvidence",
+    "CaseTimelineEvent",
     "Alert",
     "AuditLog",
 ]
+

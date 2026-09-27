@@ -1,11 +1,14 @@
 """Role model representing RBAC privileges and access tiers."""
 
 import uuid
-from typing import Any, List
+from typing import TYPE_CHECKING, Any, List
 from sqlalchemy import JSON, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.app.models.base import Base, SoftDeleteMixin, TimestampMixin
+
+if TYPE_CHECKING:
+    from backend.app.models.user import User
 
 
 class Role(Base, TimestampMixin, SoftDeleteMixin):

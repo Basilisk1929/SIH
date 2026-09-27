@@ -91,11 +91,11 @@ class RBIAtmRegistry:
     """In-memory and file-backed repository for Indian bank branches and ATM outlets."""
 
     def __init__(self, csv_path: Optional[str] = None):
-        self.csv_path = (
-            Path(csv_path)
-            if csv_path
-            else Path("/Users/ronitsingh/Anti/SIH/data/rbi/rbi_atm_outlets.csv")
-        )
+        if csv_path:
+            self.csv_path = Path(csv_path)
+        else:
+            root_dir = Path(__file__).resolve().parent.parent.parent
+            self.csv_path = root_dir / "data" / "rbi" / "rbi_atm_outlets.csv"
         self._df: Optional[pd.DataFrame] = None
         self._load_or_generate()
 

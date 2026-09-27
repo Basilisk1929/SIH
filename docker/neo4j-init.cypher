@@ -1,33 +1,37 @@
 // ==============================================================================
-// Cyber-Intelligence Platform - Initial Neo4j Graph Schema & Constraints
-// Domain: Financial Mule Networks, Link Analysis & Shared Identifiers
+// CyberShield-Intel Platform - Neo4j Graph Database Schema & Constraints
+// Domain: Financial Mule Networks, Link Analysis & Shared Identifiers (Neo4j 5.x+)
 // ==============================================================================
 
-// Uniqueness Constraints for Core Intelligence Entities
-CREATE CONSTRAINT c_bank_account_num IF NOT EXISTS
-FOR (a:BankAccount) REQUIRE a.account_number IS UNIQUE;
+// 1. UNIQUE NODE CONSTRAINTS (Normalized Schema)
+CREATE CONSTRAINT customer_id_unique IF NOT EXISTS FOR (c:Customer) REQUIRE c.customer_id IS UNIQUE;
+CREATE CONSTRAINT account_number_unique IF NOT EXISTS FOR (a:Account) REQUIRE a.account_number IS UNIQUE;
+CREATE CONSTRAINT transaction_id_unique IF NOT EXISTS FOR (t:Transaction) REQUIRE t.transaction_id IS UNIQUE;
+CREATE CONSTRAINT complaint_ack_unique IF NOT EXISTS FOR (cmp:Complaint) REQUIRE cmp.acknowledgement_no IS UNIQUE;
+CREATE CONSTRAINT complaint_id_unique IF NOT EXISTS FOR (cmp:Complaint) REQUIRE cmp.complaint_id IS UNIQUE;
+CREATE CONSTRAINT upi_vpa_unique IF NOT EXISTS FOR (u:UPI) REQUIRE u.vpa IS UNIQUE;
+CREATE CONSTRAINT phone_number_unique IF NOT EXISTS FOR (p:Phone) REQUIRE p.phone_number IS UNIQUE;
+CREATE CONSTRAINT device_id_unique IF NOT EXISTS FOR (d:Device) REQUIRE d.device_id IS UNIQUE;
+CREATE CONSTRAINT bank_code_unique IF NOT EXISTS FOR (b:Bank) REQUIRE b.bank_code IS UNIQUE;
+CREATE CONSTRAINT atm_id_unique IF NOT EXISTS FOR (atm:ATM) REQUIRE atm.atm_id IS UNIQUE;
+CREATE CONSTRAINT location_id_unique IF NOT EXISTS FOR (l:Location) REQUIRE l.location_id IS UNIQUE;
 
-CREATE CONSTRAINT c_upi_id_vpa IF NOT EXISTS
-FOR (u:UPI_ID) REQUIRE u.vpa IS UNIQUE;
+// 2. UNIQUE NODE CONSTRAINTS (Intelligence Aliases & Compatibility)
+CREATE CONSTRAINT c_bank_account_num IF NOT EXISTS FOR (a:BankAccount) REQUIRE a.account_number IS UNIQUE;
+CREATE CONSTRAINT c_upi_id_vpa IF NOT EXISTS FOR (u:UPI_ID) REQUIRE u.vpa IS UNIQUE;
+CREATE CONSTRAINT c_mule_ring_id IF NOT EXISTS FOR (r:MuleRing) REQUIRE r.ring_id IS UNIQUE;
 
-CREATE CONSTRAINT c_phone_number IF NOT EXISTS
-FOR (p:Phone) REQUIRE p.phone_number IS UNIQUE;
-
-CREATE CONSTRAINT c_device_fingerprint IF NOT EXISTS
-FOR (d:Device) REQUIRE d.device_id IS UNIQUE;
-
-CREATE CONSTRAINT c_complaint_ack IF NOT EXISTS
-FOR (c:Complaint) REQUIRE c.acknowledgement_no IS UNIQUE;
-
-CREATE CONSTRAINT c_mule_ring_id IF NOT EXISTS
-FOR (r:MuleRing) REQUIRE r.ring_id IS UNIQUE;
-
-// Performance Indexes for Pattern Matching & Link Analytics
-CREATE INDEX idx_account_risk IF NOT EXISTS
-FOR (a:BankAccount) ON (a.risk_score);
-
-CREATE INDEX idx_txn_timestamp IF NOT EXISTS
-FOR ()-[t:TRANSFERRED_TO]-() ON (t.timestamp);
-
-CREATE INDEX idx_phone_location IF NOT EXISTS
-FOR (p:Phone) ON (p.state, p.district);
+// 3. RANGE & COMPOSITE PROPERTY INDEXES
+CREATE INDEX account_mule_idx IF NOT EXISTS FOR (a:Account) ON (a.is_mule, a.mule_tier);
+CREATE INDEX account_risk_idx IF NOT EXISTS FOR (a:Account) ON (a.risk_score);
+CREATE INDEX transaction_ts_idx IF NOT EXISTS FOR (t:Transaction) ON (t.timestamp);
+CREATE INDEX transaction_amount_idx IF NOT EXISTS FOR (t:Transaction) ON (t.amount);
+CREATE INDEX transaction_fraud_idx IF NOT EXISTS FOR (t:Transaction) ON (t.is_fraud);
+CREATE INDEX complaint_category_idx IF NOT EXISTS FOR (cmp:Complaint) ON (cmp.category);
+CREATE INDEX complaint_reported_date_idx IF NOT EXISTS FOR (cmp:Complaint) ON (cmp.reported_date);
+CREATE INDEX location_city_state_idx IF NOT EXISTS FOR (l:Location) ON (l.city, l.state);
+CREATE INDEX location_hotspot_idx IF NOT EXISTS FOR (l:Location) ON (l.is_cyber_hotspot);
+CREATE INDEX phone_suspect_idx IF NOT EXISTS FOR (p:Phone) ON (p.is_suspect);
+CREATE INDEX upi_suspicious_idx IF NOT EXISTS FOR (u:UPI) ON (u.is_suspicious);
+CREATE INDEX device_shared_idx IF NOT EXISTS FOR (d:Device) ON (d.is_shared_device);
+CREATE INDEX bank_account_risk_idx IF NOT EXISTS FOR (a:BankAccount) ON (a.risk_score);

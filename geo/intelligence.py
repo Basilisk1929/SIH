@@ -31,8 +31,12 @@ class GeospatialIntelligenceEngine:
         rbi_registry: Optional[RBIAtmRegistry] = None,
         data_dir: Optional[str] = None,
     ):
-        self.resolution = int(resolution)
-        self.data_dir = Path(data_dir) if data_dir else Path("/Users/ronitsingh/Anti/SIH/data")
+        if data_dir:
+            self.data_dir = Path(data_dir)
+        else:
+            root_dir = Path(__file__).resolve().parent.parent
+            self.data_dir = root_dir / "data"
+        self.resolution = resolution
         self.rbi_registry = rbi_registry or RBIAtmRegistry()
         self.atm_analyzer = ATMProximityAnalyzer(registry=self.rbi_registry)
         self.cell_aggregator = H3CellAggregator(resolution=self.resolution)
@@ -281,3 +285,34 @@ class GeospatialIntelligenceEngine:
     def run_chicago_benchmark(self) -> Dict[str, Any]:
         """Execute methodology validation against Chicago open crime benchmark dataset."""
         return ChicagoCrimeValidationBenchmark.validate_methodology_pipeline()
+
+    def predict_cashout_locations(
+        self,
+        account_id: str,
+        current_lat: Optional[float] = None,
+        current_lng: Optional[float] = None,
+        recent_transactions: Optional[List[Dict[str, Any]]] = None,
+        candidate_radius_km: float = 15.0,
+        top_k: int = 5,
+        account_risk_score: Optional[float] = None,
+        cashout_ratio: Optional[float] = None,
+        transactions_last_1h: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Predict and rank nearby operational RBI ATMs by likelihood of future cash-out activity."""
+        from geo.prediction.predictor import CashoutLocationPredictor
+        from geo.prediction.schemas import CashoutPredictionRequest
+
+        predictor = CashoutLocationPredictor(rbi_registry=self.rbi_registry, geo_engine=self)
+        req = CashoutPredictionRequest(
+            account_id=account_id,
+            current_latitude=current_lat,
+            current_longitude=current_lng,
+            recent_transactions=recent_transactions,
+            candidate_radius_km=candidate_radius_km,
+            top_k=top_k,
+            account_risk_score=account_risk_score,
+            cashout_ratio=cashout_ratio,
+            transactions_last_1h=transactions_last_1h,
+        )
+        return predictor.predict(req).model_dump()
+

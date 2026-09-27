@@ -1,23 +1,58 @@
 """Financial transactions and risk assessment endpoints."""
 
 from decimal import Decimal
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.app.db.session import get_db
+from backend.app.core.security import Role, get_current_user_claims, require_roles
+from backend.app.db.session import get_db, get_db_optional
 from backend.app.schemas.risk import RiskAssessmentRequest, RiskAssessmentResponse
 from backend.app.schemas.transaction import BankAccountSummary, TransactionResponse
+from backend.app.schemas.pipeline import TransactionPipelineRequest, TransactionPipelineResponse
 from backend.app.services.risk_engine import RiskEngineService
+from backend.app.services.pipeline_service import PipelineService
 
 router = APIRouter()
+
+
+@router.post(
+    "",
+    response_model=TransactionPipelineResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles([Role.ADMIN, Role.SUPERVISOR, Role.INVESTIGATOR]))],
+)
+@router.post(
+    "/",
+    response_model=TransactionPipelineResponse,
+    status_code=status.HTTP_201_CREATED,
+    include_in_schema=False,
+    dependencies=[Depends(require_roles([Role.ADMIN, Role.SUPERVISOR, Role.INVESTIGATOR]))],
+)
+async def submit_and_evaluate_transaction(
+    request: TransactionPipelineRequest,
+    db: Optional[AsyncSession] = Depends(get_db_optional),
+) -> TransactionPipelineResponse:
+    """Execute complete end-to-end transaction intelligence flow:
+    Transaction -> Ingestion -> Validation -> PostgreSQL -> Risk Engine (XGBoost) -> Neo4j -> Geospatial Engine -> Alert Engine -> FastAPI -> Frontend.
+    """
+    try:
+        result = await PipelineService.process_transaction(request.model_dump(), db=db)
+        return TransactionPipelineResponse(**result)
+    except ValueError as val_err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(val_err))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Transaction pipeline failure. The incident has been logged.",
+        )
 
 
 @router.get("", response_model=List[Dict[str, Any]])
 async def list_recent_transactions(
     limit: int = Query(20, ge=1, le=100),
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
 ) -> List[Dict[str, Any]]:
     """Retrieve simulated high-velocity financial transactions."""
-    # Synthetic transactional feed
     synthetic_txns = []
     for i in range(limit):
         amount = 10000.0 + (i * 4500.0) % 85000.0
@@ -38,7 +73,11 @@ async def list_recent_transactions(
     return synthetic_txns
 
 
-@router.post("/assess-risk", response_model=RiskAssessmentResponse)
+@router.post(
+    "/assess-risk",
+    response_model=RiskAssessmentResponse,
+    dependencies=[Depends(require_roles([Role.ADMIN, Role.SUPERVISOR, Role.INVESTIGATOR, Role.ANALYST]))],
+)
 async def assess_entity_risk(
     request: RiskAssessmentRequest,
 ) -> RiskAssessmentResponse:
@@ -50,6 +89,7 @@ async def assess_entity_risk(
 @router.get("/accounts/{account_number}", response_model=BankAccountSummary)
 async def get_account_risk_summary(
     account_number: str,
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
 ) -> BankAccountSummary:
     """Retrieve synthetic bank account metadata, mule layer level, and risk score."""
     is_mule = account_number.startswith("MULE") or "9" in account_number

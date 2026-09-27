@@ -35,7 +35,7 @@ class TokenPayload(BaseModel):
 class UserLogin(BaseModel):
     """Direct JSON credentials login schema."""
 
-    email: EmailStr
+    email: str = Field(..., min_length=3, max_length=255)
     password: str = Field(..., min_length=8, max_length=128)
 
 

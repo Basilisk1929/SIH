@@ -14,14 +14,41 @@ class ComplaintService:
 
     @staticmethod
     async def create_complaint(db: AsyncSession, complaint_in: ComplaintCreate) -> Complaint:
-        """Create and persist a new synthetic complaint."""
+        """Create and persist a new synthetic complaint, extracting entities via NLP if narrative provided."""
         ack_no = complaint_in.acknowledgement_no or f"NCRP-SYN-2024-{func.floor(func.random() * 90000 + 10000)}"
+
+        category = complaint_in.category
+        subcategory = complaint_in.subcategory
+        reported_loss = complaint_in.reported_loss_inr
+        suspect_acc = complaint_in.suspect_account_number
+        suspect_upi = complaint_in.suspect_upi
+        suspect_phone = complaint_in.suspect_phone
+
+        # Trigger NLP Extraction pipeline if narrative is provided
+        if complaint_in.description_synthetic:
+            try:
+                from nlp.pipelines.cybercrime_nlp_pipeline import CybercrimeNLPPipeline
+                nlp_res = CybercrimeNLPPipeline().process(complaint_in.description_synthetic)
+                if nlp_res.scam_type and nlp_res.confidence >= 0.35:
+                    category = nlp_res.scam_type
+                    subcategory = nlp_res.scam_type
+                entities = {e.label: e.normalized_value for e in nlp_res.entities}
+                if not suspect_acc and entities.get("ACCOUNT"):
+                    suspect_acc = str(entities.get("ACCOUNT"))
+                if not suspect_upi and entities.get("UPI_ID"):
+                    suspect_upi = str(entities.get("UPI_ID"))
+                if not suspect_phone and entities.get("PHONE"):
+                    suspect_phone = str(entities.get("PHONE"))
+                if (not reported_loss or reported_loss == Decimal("0.0")) and entities.get("AMOUNT"):
+                    reported_loss = Decimal(str(entities.get("AMOUNT")))
+            except Exception:
+                pass
         
         # Initial preliminary heuristic risk assessment
         initial_risk = Decimal("0.35")
-        if complaint_in.reported_loss_inr > 100000:
+        if reported_loss > 100000:
             initial_risk += Decimal("0.25")
-        if complaint_in.suspect_upi and "mule" in complaint_in.suspect_upi.lower():
+        if suspect_upi and "mule" in suspect_upi.lower():
             initial_risk += Decimal("0.30")
         initial_risk = min(initial_risk, Decimal("0.99"))
 
@@ -33,15 +60,15 @@ class ComplaintService:
 
         db_obj = Complaint(
             acknowledgement_no=str(ack_no),
-            category=complaint_in.category,
-            subcategory=complaint_in.subcategory,
+            category=category,
+            subcategory=subcategory,
             victim_state=complaint_in.victim_state,
             victim_district=complaint_in.victim_district,
-            reported_loss_inr=complaint_in.reported_loss_inr,
-            suspect_upi=complaint_in.suspect_upi,
-            suspect_account_number=complaint_in.suspect_account_number,
+            reported_loss_inr=reported_loss,
+            suspect_upi=suspect_upi,
+            suspect_account_number=suspect_acc,
             suspect_ifsc=complaint_in.suspect_ifsc,
-            suspect_phone=complaint_in.suspect_phone,
+            suspect_phone=suspect_phone,
             incident_timestamp=complaint_in.incident_timestamp,
             status="NEW",
             triage_priority=priority,

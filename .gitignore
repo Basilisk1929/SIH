@@ -117,3 +117,6 @@ data/dead_letter/*
 logs/
 tmp/
 scratch/
+
+# Tool binaries (cloudflared, etc.)
+.tools/

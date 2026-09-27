@@ -198,6 +198,7 @@ class RealTimeAlertEngine:
         new_status: str,
         investigator_id: Optional[str] = None,
         resolution_notes: Optional[str] = None,
+        linked_case_id: Optional[str] = None,
     ) -> AlertResponse:
         """Transition alert workflow state with validation and real-time broadcast."""
         status_clean = new_status.strip().upper()
@@ -217,14 +218,18 @@ class RealTimeAlertEngine:
             )
 
         now_iso = datetime.now(timezone.utc).isoformat()
-        updated = alert.model_copy(
-            update={
-                "status": status_clean,
-                "investigator_id": investigator_id or alert.investigator_id,
-                "resolution_notes": resolution_notes or alert.resolution_notes,
-                "updated_at": now_iso,
-            }
-        )
+        update_dict: Dict[str, Any] = {
+            "status": status_clean,
+            "investigator_id": investigator_id or alert.investigator_id,
+            "resolution_notes": resolution_notes or alert.resolution_notes,
+            "updated_at": now_iso,
+        }
+        if linked_case_id:
+            update_dict["linked_case_id"] = linked_case_id
+        elif alert.linked_case_id:
+            update_dict["linked_case_id"] = alert.linked_case_id
+
+        updated = alert.model_copy(update=update_dict)
 
         with self._lock:
             self._alerts_by_id[updated.id] = updated

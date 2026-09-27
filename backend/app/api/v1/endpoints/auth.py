@@ -60,6 +60,35 @@ MOCK_DEV_USERS: Dict[str, Dict[str, Any]] = {
         "badge_number": "CYB-IND-4091",
         "department": "Financial Fraud Intelligence Unit",
     },
+    # Public SIH Demonstration Environment (Synthetic Accounts)
+    "investigator.demo@cybershield.local": {
+        "hashed_password": get_password_hash("InvestigatorDemo@2024!"),
+        "role": Role.INVESTIGATOR.value,
+        "full_name": "Demo Investigator (SIH Judge Access)",
+        "badge_number": "SIH-INV-001",
+        "department": "Mule Detection Task Force (Demo)",
+    },
+    "supervisor.demo@cybershield.local": {
+        "hashed_password": get_password_hash("SupervisorDemo@2024!"),
+        "role": Role.SUPERVISOR.value,
+        "full_name": "Demo Supervisor (SIH Judge Access)",
+        "badge_number": "SIH-SUP-001",
+        "department": "Supervisory Oversight Division (Demo)",
+    },
+    "analyst.demo@cybershield.local": {
+        "hashed_password": get_password_hash("AnalystDemo@2024!"),
+        "role": Role.ANALYST.value,
+        "full_name": "Demo Analyst (SIH Judge Access)",
+        "badge_number": "SIH-ANA-001",
+        "department": "Financial Intelligence Unit (Demo)",
+    },
+    "admin.demo@cybershield.local": {
+        "hashed_password": get_password_hash("AdminDemo@2024!"),
+        "role": Role.ADMIN.value,
+        "full_name": "Demo Administrator (SIH Judge Access)",
+        "badge_number": "SIH-ADM-001",
+        "department": "System Administration (Demo)",
+    },
 }
 
 

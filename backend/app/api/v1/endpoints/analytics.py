@@ -1,13 +1,16 @@
 """Cybercrime intelligence dashboard analytics and summary KPI endpoints."""
 
 from typing import Any, Dict
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from backend.app.core.security import get_current_user_claims
 
 router = APIRouter()
 
 
 @router.get("/overview")
-async def get_analytics_overview() -> Dict[str, Any]:
+async def get_analytics_overview(
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
+) -> Dict[str, Any]:
     """Provide high-level intelligence metrics for dashboard header."""
     return {
         "total_complaints_reported": 14280,
@@ -21,7 +24,9 @@ async def get_analytics_overview() -> Dict[str, Any]:
 
 
 @router.get("/category-distribution")
-async def get_category_distribution() -> Dict[str, Any]:
+async def get_category_distribution(
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
+) -> Dict[str, Any]:
     """Breakdown of complaints by cyber fraud modus operandi."""
     return {
         "categories": [
@@ -36,7 +41,9 @@ async def get_category_distribution() -> Dict[str, Any]:
 
 
 @router.get("/state-distribution")
-async def get_state_distribution() -> Dict[str, Any]:
+async def get_state_distribution(
+    claims: Dict[str, Any] = Depends(get_current_user_claims),
+) -> Dict[str, Any]:
     """Geographic breakdown across Indian states for hotspot mapping."""
     return {
         "states": [
