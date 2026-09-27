@@ -14,6 +14,7 @@ from backend.app.core.config import settings
 _is_cloud_db = (
     ".render.com" in settings.DATABASE_URL
     or ".supabase.co" in settings.DATABASE_URL
+    or "supabase" in settings.DATABASE_URL
     or os.getenv("PGSSLMODE") == "require"
     or settings.ENVIRONMENT.lower() in ("production", "prod", "staging")
 )

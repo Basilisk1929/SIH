@@ -29,9 +29,15 @@ host = parsed.hostname or "postgres"
 port = parsed.port or 5432
 database = parsed.path.lstrip("/") or "cyber_intelligence_db"
 
-# Render managed PostgreSQL may require SSL
+# Render / Supabase managed PostgreSQL requires SSL
 ssl_mode = os.getenv("PGSSLMODE", None)
-use_ssl = ssl_mode == "require" or host.endswith(".render.com") or host.endswith(".oregon-postgres.render.com")
+use_ssl = (
+    ssl_mode == "require"
+    or "supabase" in host
+    or host.endswith(".render.com")
+    or host.endswith(".oregon-postgres.render.com")
+    or os.getenv("ENVIRONMENT", "").lower() in ("production", "prod", "staging")
+)
 
 max_retries = 30
 for attempt in range(1, max_retries + 1):

@@ -58,9 +58,23 @@ def run_migrations_offline() -> None:
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode using AsyncEngine."""
     db_url = str(settings.DATABASE_URL)
+    engine_kwargs = {"poolclass": pool.NullPool}
+    is_cloud_db = (
+        ".render.com" in db_url
+        or "supabase" in db_url
+        or os.getenv("PGSSLMODE") == "require"
+        or settings.ENVIRONMENT.lower() in ("production", "prod", "staging")
+    )
+    if is_cloud_db and "sqlite" not in db_url:
+        import ssl
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+        engine_kwargs["connect_args"] = {"ssl": ssl_ctx}
+
     connectable = create_async_engine(
         db_url,
-        poolclass=pool.NullPool,
+        **engine_kwargs,
     )
 
     async with connectable.connect() as connection:
