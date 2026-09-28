@@ -3,7 +3,7 @@
 import logging
 import os
 import secrets
-from typing import Any, List
+from typing import Any, List, Optional
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -123,6 +123,24 @@ class Settings(BaseSettings):
     NEO4J_URI: str = "bolt://localhost:7687"
     NEO4J_USER: str = "neo4j"
     NEO4J_PASSWORD: str = ""  # MUST be set via environment variable (never hardcode)
+    NEO4J_DATABASE: Optional[str] = None
+
+    @field_validator("NEO4J_USER", mode="before")
+    @classmethod
+    def resolve_neo4j_user(cls, v: Any) -> str:
+        val = str(v).strip().strip("'").strip('"') if v else ""
+        if not val or val == "neo4j":
+            fallback = os.getenv("NEO4J_USERNAME", "")
+            if fallback:
+                return fallback.strip().strip("'").strip('"')
+        return val or "neo4j"
+
+    @field_validator("NEO4J_PASSWORD", mode="before")
+    @classmethod
+    def strip_neo4j_password(cls, v: Any) -> str:
+        if isinstance(v, str):
+            return v.strip().strip("'").strip('"')
+        return v or ""
 
     # Redis Cache
     REDIS_HOST: str = "localhost"

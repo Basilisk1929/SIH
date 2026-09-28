@@ -32,10 +32,17 @@ async def close_neo4j_driver() -> None:
         logger.info("Neo4j driver pool closed cleanly.")
 
 
+def _get_session_kwargs() -> dict:
+    kwargs = {}
+    if getattr(settings, "NEO4J_DATABASE", None):
+        kwargs["database"] = settings.NEO4J_DATABASE
+    return kwargs
+
+
 async def get_neo4j_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency that yields a managed Neo4j async session."""
     driver = get_neo4j_driver()
-    async with driver.session() as session:
+    async with driver.session(**_get_session_kwargs()) as session:
         yield session
 
 
@@ -43,7 +50,7 @@ async def get_optional_neo4j_session() -> AsyncGenerator[AsyncSession | None, No
     """Dependency that yields an active Neo4j session if accessible, else None."""
     try:
         driver = get_neo4j_driver()
-        async with driver.session() as session:
+        async with driver.session(**_get_session_kwargs()) as session:
             yield session
     except Exception:
         yield None
@@ -54,10 +61,10 @@ async def check_neo4j_health() -> bool:
     """Verify connectivity to the Neo4j cluster."""
     try:
         driver = get_neo4j_driver()
-        async with driver.session() as session:
+        async with driver.session(**_get_session_kwargs()) as session:
             result = await session.run("RETURN 1 AS ping")
             record = await result.single()
             return record is not None and record["ping"] == 1
     except Exception as exc:
-        logger.warning(f"Neo4j health check check failed: {exc}")
+        logger.warning(f"Neo4j health check failed: {exc}")
         return False
