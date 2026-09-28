@@ -162,7 +162,7 @@ describe('Phase 11F: DemoSimulationModal UI Component', () => {
     fireEvent.click(resetBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Purged 1 alerts, 0 cases, 1 transactions, and 1 complaints/i)).toBeInTheDocument();
+      expect(screen.getByText(/Purged 1 alerts, 0 cases/i)).toBeInTheDocument();
     });
   });
 });

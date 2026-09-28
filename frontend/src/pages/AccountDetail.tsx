@@ -13,7 +13,7 @@ import { AccountDetail as AccountDetailType } from '../types';
 export const AccountDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { canPerformAction, isAnalyst } = useAuth();
+  const { user, canPerformAction, isAnalyst } = useAuth();
 
   const [account, setAccount] = useState<AccountDetailType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +23,15 @@ export const AccountDetail: React.FC = () => {
   const [freezing, setFreezing] = useState(false);
   const [freezeSuccess, setFreezeSuccess] = useState<string | null>(null);
   const [freezeError, setFreezeError] = useState<string | null>(null);
+  const [isSimulatedFrozen, setIsSimulatedFrozen] = useState(false);
+  const [simulatedEvent, setSimulatedEvent] = useState<{
+    action: string;
+    actor: string;
+    account: string;
+    result: string;
+    environment: string;
+    timestamp: string;
+  } | null>(null);
 
   // Graph connected nodes
   const [connectedNodes, setConnectedNodes] = useState<any[]>([]);
@@ -57,24 +66,59 @@ export const AccountDetail: React.FC = () => {
   }, [id]);
 
   const handleFreezeAccount = async () => {
-    if (!id) return;
+    if (!id || !account) return;
+
+    // RBAC & Authentication enforcement
+    if (!canPerformAction('FREEZE_ACCOUNT')) {
+      setFreezeError('Authorization Denied: Only ADMIN or SUPERVISOR roles can execute emergency lien orders.');
+      return;
+    }
+
     const confirmFreeze = window.confirm(
-      `CONFIRM EMERGENCY GOLDEN-HOUR ACTION:\n\nIssue formal debit freeze order on account ${account?.account_number || id}?\nThis action will be permanently recorded in the forensic audit ledger.`
+      `CONFIRM EMERGENCY GOLDEN-HOUR ACTION:\n\nIssue formal debit freeze order on account ${account.account_number || id}?\nThis action will be permanently recorded in the forensic audit ledger.`
     );
     if (!confirmFreeze) return;
 
-    try {
-      setFreezing(true);
-      setFreezeError(null);
-      setFreezeSuccess(null);
+    const isDemoMode =
+      import.meta.env.VITE_APP_ENV === 'SYNTHETIC_DEVELOPMENT' ||
+      account.account_number?.startsWith('SYN_') ||
+      Boolean(account.holder_synthetic_name) ||
+      import.meta.env.MODE !== 'production';
 
+    setFreezing(true);
+    setFreezeError(null);
+    setFreezeSuccess(null);
+
+    try {
+      // First attempt real API invocation
       const res = await AccountsService.freezeAccount(id, 'NCRP Golden-Hour Mule Suppression Protocol');
-      setFreezeSuccess(res.message || `Account successfully placed on lien. Freeze reference: ${res.freeze_ref || 'FRZ-ACTIVE'}`);
-      if (account) {
-        setAccount({ ...account, is_frozen: true });
-      }
+      setFreezeSuccess(res.message || `Account placed on lien. Freeze reference: ${res.freeze_ref || 'FRZ-ACTIVE'}`);
+      setAccount({ ...account, is_frozen: true });
     } catch (err: any) {
-      setFreezeError(err.message || 'Failed to place account on freeze.');
+      const isNotFound = err?.statusCode === 404 || (err?.message && /not found/i.test(err.message));
+
+      if (isDemoMode && isNotFound) {
+        // Expected SIH Demo Mode path: simulate isolated freeze without fake backend endpoints
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        const now = new Date();
+        const timestampStr = `${now.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
+        const actorName = (user as any)?.email || (user as any)?.username || 'sih-evaluator@cybershield.gov.in';
+
+        setIsSimulatedFrozen(true);
+        setFreezeSuccess('Golden-Hour Emergency Freeze Simulated Successfully');
+        setSimulatedEvent({
+          action: 'GOLDEN_HOUR_FREEZE_SIMULATED',
+          actor: actorName,
+          account: account.account_number,
+          result: 'SUCCESS',
+          environment: 'SIH SYNTHETIC DEMO',
+          timestamp: timestampStr,
+        });
+      } else {
+        // Real production mode or unexpected network/server failure
+        setFreezeError(err.message || 'Failed to place account on freeze.');
+      }
     } finally {
       setFreezing(false);
     }
@@ -135,7 +179,22 @@ export const AccountDetail: React.FC = () => {
             <Badge variant={riskScore > 0.75 ? 'CRITICAL' : riskScore > 0.4 ? 'HIGH' : 'LOW'}>
               {(riskScore * 100).toFixed(0)}% COMPOSITE RISK
             </Badge>
-            {account.is_frozen ? (
+            {isSimulatedFrozen ? (
+              <span
+                style={{
+                  background: 'rgba(245, 158, 11, 0.2)',
+                  border: '1px solid #f59e0b',
+                  color: '#fbbf24',
+                  padding: '2px 8px',
+                  borderRadius: 4,
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.5px',
+                }}
+              >
+                ⚡ EMERGENCY FREEZE — SIMULATED
+              </span>
+            ) : account.is_frozen ? (
               <span
                 style={{
                   background: 'rgba(239, 68, 68, 0.2)',
@@ -186,23 +245,29 @@ export const AccountDetail: React.FC = () => {
             <button
               className="btn-action"
               onClick={handleFreezeAccount}
-              disabled={freezing || account.is_frozen}
+              disabled={freezing || account.is_frozen || isSimulatedFrozen}
               style={{
-                background: account.is_frozen ? 'rgba(255,255,255,0.05)' : 'var(--accent-rose)',
-                color: '#fff',
-                border: 'none',
+                background: (account.is_frozen || isSimulatedFrozen) ? 'rgba(255,255,255,0.05)' : 'var(--accent-rose)',
+                color: (account.is_frozen || isSimulatedFrozen) ? '#9ca3af' : '#fff',
+                border: (account.is_frozen || isSimulatedFrozen) ? '1px solid rgba(255,255,255,0.1)' : 'none',
                 padding: '9px 18px',
                 borderRadius: 6,
                 fontWeight: 700,
                 fontSize: '0.85rem',
-                cursor: freezing || account.is_frozen ? 'not-allowed' : 'pointer',
+                cursor: (freezing || account.is_frozen || isSimulatedFrozen) ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
               }}
             >
-              <span>{account.is_frozen ? '🔒' : '⚡'}</span>
-              {account.is_frozen ? 'Lien Order Already Enforced' : freezing ? 'Transmitting Lien Requisition...' : 'Issue Golden-Hour Emergency Lien / Freeze'}
+              <span>{isSimulatedFrozen ? '✓' : account.is_frozen ? '🔒' : '⚡'}</span>
+              {isSimulatedFrozen
+                ? '✓ Emergency Freeze Simulated'
+                : account.is_frozen
+                ? 'Lien Order Already Enforced'
+                : freezing
+                ? 'Processing Golden-Hour Emergency Action...'
+                : 'Issue Golden-Hour Emergency Lien / Freeze'}
             </button>
           )}
 
@@ -213,8 +278,51 @@ export const AccountDetail: React.FC = () => {
       </div>
 
       {freezeSuccess && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', color: '#6ee7b7', padding: '12px 16px', borderRadius: 8, fontSize: '0.85rem' }}>
-          {freezeSuccess}
+        <div
+          style={{
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid #10b981',
+            borderRadius: 8,
+            padding: '16px 20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: '1.1rem', color: '#10b981' }}>✓</span>
+              <strong style={{ color: '#34d399', fontSize: '0.95rem' }}>
+                {freezeSuccess}
+              </strong>
+            </div>
+            {isSimulatedFrozen && (
+              <span
+                style={{
+                  background: 'rgba(245, 158, 11, 0.2)',
+                  border: '1px solid #f59e0b',
+                  color: '#fbbf24',
+                  padding: '2px 8px',
+                  borderRadius: 4,
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                }}
+              >
+                ⚡ Golden-Hour Action — DEMO
+              </span>
+            )}
+          </div>
+
+          <div style={{ fontSize: '0.85rem', color: '#e5e7eb', lineHeight: 1.5 }}>
+            Demo action recorded successfully in the synthetic investigation environment. Emergency freeze simulated successfully.{' '}
+            <span style={{ color: '#fbbf24', fontWeight: 600 }}>Demo-only action. No real bank account was affected.</span>
+          </div>
+
+          {simulatedEvent && (
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>
+              Simulated Execution Timestamp: <strong style={{ color: '#e5e7eb', fontFamily: 'var(--font-mono)' }}>{simulatedEvent.timestamp}</strong>
+            </div>
+          )}
         </div>
       )}
       {freezeError && <ErrorMessage message={freezeError} />}
@@ -356,6 +464,113 @@ export const AccountDetail: React.FC = () => {
             <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: 4 }}>
               Predicted ATM exit point in high-risk H3 cell
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Forensic Audit Ledger & Action Timeline */}
+      <div className="stat-card" style={{ padding: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+          <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>📜</span> Forensic Audit Ledger & Event Timeline
+          </h3>
+          <span
+            style={{
+              fontSize: '0.74rem',
+              color: '#f59e0b',
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              padding: '3px 9px',
+              borderRadius: 4,
+              fontWeight: 600,
+            }}
+          >
+            SIH SYNTHETIC AUDIT LOG
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {simulatedEvent && (
+            <div
+              style={{
+                background: 'rgba(16, 185, 129, 0.06)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: 8,
+                padding: '14px 18px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ color: '#10b981', fontWeight: 700 }}>⚡</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.9rem', color: '#34d399' }}>
+                    Action: {simulatedEvent.action}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      background: 'rgba(16, 185, 129, 0.2)',
+                      color: '#6ee7b7',
+                      padding: '2px 7px',
+                      borderRadius: 4,
+                      fontWeight: 700,
+                    }}
+                  >
+                    Result: {simulatedEvent.result}
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  {simulatedEvent.timestamp}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: 8,
+                  fontSize: '0.8rem',
+                  color: 'var(--text-secondary)',
+                  marginTop: 4,
+                }}
+              >
+                <div>
+                  Actor: <strong style={{ color: 'var(--text-primary)' }}>{simulatedEvent.actor}</strong>
+                </div>
+                <div>
+                  Account: <strong style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>{simulatedEvent.account}</strong>
+                </div>
+                <div>
+                  Environment: <strong style={{ color: '#fbbf24' }}>{simulatedEvent.environment}</strong>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 6,
+              padding: '12px 16px',
+              fontSize: '0.8rem',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            <div>
+              <span style={{ color: 'var(--text-muted)' }}>Baseline Ingestion & Risk Profiling</span> • Account:{' '}
+              <code style={{ color: 'var(--accent-cyan)' }}>{account.account_number}</code>
+            </div>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+              SYSTEM RECORDED
+            </span>
           </div>
         </div>
       </div>

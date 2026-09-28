@@ -9,6 +9,7 @@ export const Login: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>('Connecting to CyberShield backend...');
 
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -23,23 +24,41 @@ export const Login: React.FC = () => {
     }
   }, [isAuthenticated, navigate, from]);
 
+  const executeLogin = async (userEmail: string, userPwd: string, remember: boolean) => {
+    setSubmitting(true);
+    setError(null);
+    setLoadingMessage('Connecting to CyberShield backend...');
+
+    // If request takes longer than 6 seconds, backend may be waking up on Render free tier
+    const wakeupTimer = setTimeout(() => {
+      setLoadingMessage('Backend is waking up — this can take up to 30–60 seconds on the free-tier demo environment.');
+    }, 6000);
+
+    try {
+      await login(userEmail, userPwd, remember);
+      clearTimeout(wakeupTimer);
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      clearTimeout(wakeupTimer);
+      const errMsg = err.message || '';
+      if (errMsg.includes('Network Error') || errMsg.includes('Failed to fetch') || errMsg.includes('504') || errMsg.includes('502')) {
+        setError('Backend is still waking up from Render free-tier sleep. Please wait a moment and click Authorize Secure Access again.');
+      } else {
+        setError(err.message || 'Authentication failed. Please verify credentials.');
+      }
+    } finally {
+      clearTimeout(wakeupTimer);
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password) {
       setError('Please provide officer email and password.');
       return;
     }
-
-    setSubmitting(true);
-    setError(null);
-    try {
-      await login(username, password, rememberMe);
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please verify credentials.');
-    } finally {
-      setSubmitting(false);
-    }
+    await executeLogin(username, password, rememberMe);
   };
 
   const handleQuickDemoLogin = async (role: UserRole) => {
@@ -65,16 +84,7 @@ export const Login: React.FC = () => {
     }
     setUsername(email);
     setPassword(pwd);
-    setSubmitting(true);
-    setError(null);
-    try {
-      await login(email, pwd, true);
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please verify credentials.');
-    } finally {
-      setSubmitting(false);
-    }
+    await executeLogin(email, pwd, true);
   };
 
   return (
@@ -100,14 +110,14 @@ export const Login: React.FC = () => {
         }}
       >
         {/* Official Brand Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <img
             src="/cybershield-logo.png"
             alt="CyberShield Official Logo"
             style={{
-              width: '170px',
+              width: '160px',
               height: 'auto',
-              maxHeight: '130px',
+              maxHeight: '128px',
               margin: '0 auto 12px auto',
               display: 'block',
               objectFit: 'contain',
@@ -121,7 +131,7 @@ export const Login: React.FC = () => {
           </p>
         </div>
 
-        {/* Evaluation Banner */}
+        {/* Evaluation Banner & Render Free-Tier Notice */}
         <div
           style={{
             backgroundColor: '#0f0f0f',
@@ -137,7 +147,10 @@ export const Login: React.FC = () => {
           <div style={{ fontWeight: 700, letterSpacing: '0.04em', color: '#f59e0b', marginBottom: '3px' }}>
             SMART INDIA HACKATHON — EVALUATION MODE
           </div>
-          <div>Public demonstration environment — synthetic data only.</div>
+          <div style={{ marginBottom: '6px' }}>Public demonstration environment — synthetic data only.</div>
+          <div style={{ borderTop: '1px solid #1f1f1f', paddingTop: '6px', color: '#888888', fontSize: '0.71rem' }}>
+            ⚡ <strong>Demo Environment Notice:</strong> The backend runs on Render's free tier and may take 30–60 seconds to wake up after inactivity. If login initially takes longer than usual, please wait a moment and try again.
+          </div>
         </div>
 
         {/* Quick Demo Access */}
@@ -174,6 +187,28 @@ export const Login: React.FC = () => {
           </div>
         </div>
 
+        {/* Loading status message */}
+        {submitting && (
+          <div
+            style={{
+              backgroundColor: '#121212',
+              border: '1px solid #262626',
+              borderRadius: '6px',
+              padding: '10px 14px',
+              marginBottom: '16px',
+              fontSize: '0.78rem',
+              color: '#38bdf8',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              lineHeight: 1.4,
+            }}
+          >
+            <span style={{ fontSize: '1rem' }}>🔄</span>
+            <span>{loadingMessage}</span>
+          </div>
+        )}
+
         {/* Error message */}
         {error && (
           <div
@@ -185,6 +220,7 @@ export const Login: React.FC = () => {
               borderRadius: '6px',
               fontSize: '0.8rem',
               marginBottom: '20px',
+              lineHeight: 1.4,
             }}
           >
             {error}
@@ -272,7 +308,7 @@ export const Login: React.FC = () => {
               opacity: submitting ? 0.7 : 1,
             }}
           >
-            {submitting ? 'Authenticating Officer...' : 'Authorize Secure Access'}
+            {submitting ? 'Connecting to CyberShield backend...' : 'Authorize Secure Access'}
           </button>
         </form>
 
