@@ -35,7 +35,7 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
 }) => {
   const getStyle = (): React.CSSProperties => {
-    // If variant is a severity, priority, status or role token
+    // 1. Severity / Priority styling
     const vUpper = String(variant).toUpperCase();
     const effectiveSeverity =
       severity ||
@@ -44,14 +44,14 @@ export const Badge: React.FC<BadgeProps> = ({
     if (effectiveSeverity) {
       switch (effectiveSeverity) {
         case 'CRITICAL':
-          return { backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)' };
+          return { backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.35)' };
         case 'HIGH':
-          return { backgroundColor: 'rgba(245, 158, 11, 0.2)', color: '#fcd34d', border: '1px solid rgba(245, 158, 11, 0.4)' };
+          return { backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.35)' };
         case 'MEDIUM':
-          return { backgroundColor: 'rgba(0, 242, 254, 0.15)', color: '#67e8f9', border: '1px solid rgba(0, 242, 254, 0.3)' };
+          return { backgroundColor: 'rgba(0, 136, 255, 0.12)', color: '#60a5fa', border: '1px solid rgba(0, 136, 255, 0.35)' };
         case 'LOW':
         default:
-          return { backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#6ee7b7', border: '1px solid rgba(16, 185, 129, 0.3)' };
+          return { backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.35)' };
       }
     }
 
@@ -60,19 +60,19 @@ export const Badge: React.FC<BadgeProps> = ({
       switch (status as string) {
         case 'NEW':
         case 'OPEN':
-          return { backgroundColor: 'rgba(99, 102, 241, 0.2)', color: '#a5b4fc', border: '1px solid rgba(99, 102, 241, 0.4)' };
+          return { backgroundColor: 'rgba(99, 102, 241, 0.12)', color: '#a5b4fc', border: '1px solid rgba(99, 102, 241, 0.35)' };
         case 'INVESTIGATING':
         case 'UNDER_INVESTIGATION':
-          return { backgroundColor: 'rgba(245, 158, 11, 0.2)', color: '#fcd34d', border: '1px solid rgba(245, 158, 11, 0.4)' };
+          return { backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.35)' };
         case 'ACKNOWLEDGED':
-          return { backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#7dd3fc', border: '1px solid rgba(56, 189, 248, 0.4)' };
+          return { backgroundColor: 'rgba(0, 136, 255, 0.12)', color: '#60a5fa', border: '1px solid rgba(0, 136, 255, 0.35)' };
         case 'RESOLVED':
         case 'CLOSED':
-          return { backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#6ee7b7', border: '1px solid rgba(16, 185, 129, 0.4)' };
+          return { backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.35)' };
         case 'FROZEN':
-          return { backgroundColor: 'rgba(239, 68, 68, 0.25)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.5)' };
+          return { backgroundColor: 'rgba(239, 68, 68, 0.18)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.45)' };
         case 'FALSE_POSITIVE':
-          return { backgroundColor: 'rgba(100, 116, 139, 0.2)', color: '#cbd5e1', border: '1px solid rgba(100, 116, 139, 0.4)' };
+          return { backgroundColor: 'rgba(115, 115, 115, 0.15)', color: '#d4d4d4', border: '1px solid rgba(115, 115, 115, 0.3)' };
       }
     }
 
@@ -80,21 +80,21 @@ export const Badge: React.FC<BadgeProps> = ({
     if (role) {
       switch (role) {
         case 'ADMIN':
-          return { backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)' };
+          return { backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.35)' };
         case 'SUPERVISOR':
-          return { backgroundColor: 'rgba(168, 85, 247, 0.2)', color: '#d8b4fe', border: '1px solid rgba(168, 85, 247, 0.4)' };
+          return { backgroundColor: 'rgba(168, 85, 247, 0.12)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.35)' };
         case 'INVESTIGATOR':
-          return { backgroundColor: 'rgba(0, 242, 254, 0.2)', color: '#67e8f9', border: '1px solid rgba(0, 242, 254, 0.4)' };
+          return { backgroundColor: 'rgba(0, 136, 255, 0.12)', color: '#60a5fa', border: '1px solid rgba(0, 136, 255, 0.35)' };
         case 'ANALYST':
-          return { backgroundColor: 'rgba(59, 130, 246, 0.2)', color: '#93c5fd', border: '1px solid rgba(59, 130, 246, 0.4)' };
+          return { backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#93c5fd', border: '1px solid rgba(59, 130, 246, 0.35)' };
       }
     }
 
     if (variant === 'outline') {
-      return { backgroundColor: 'transparent', color: '#94a3b8', border: '1px solid #334155' };
+      return { backgroundColor: 'transparent', color: '#a0a0a0', border: '1px solid #262626' };
     }
 
-    return { backgroundColor: '#1e293b', color: '#cbd5e1', border: '1px solid #334155' };
+    return { backgroundColor: '#141414', color: '#d4d4d4', border: '1px solid #242424' };
   };
 
   const sizeStyles: Record<string, React.CSSProperties> = {

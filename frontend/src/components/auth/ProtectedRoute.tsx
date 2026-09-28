@@ -36,9 +36,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, ch
         <button
           onClick={() => window.history.back()}
           style={{
-            backgroundColor: 'rgba(0, 242, 254, 0.15)',
-            color: '#00f2fe',
-            border: '1px solid rgba(0, 242, 254, 0.4)',
+            backgroundColor: '#141414',
+            color: '#f5f5f5',
+            border: '1px solid #262626',
             padding: '8px 20px',
             borderRadius: '6px',
             cursor: 'pointer',

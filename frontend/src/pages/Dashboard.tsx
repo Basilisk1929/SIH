@@ -30,7 +30,6 @@ export const Dashboard: React.FC = () => {
 
   const isAuthorizedForDemo = user && (user.role === 'ADMIN' || user.role === 'SUPERVISOR' || user.role === 'INVESTIGATOR');
 
-
   // Real-Time stream hook
   useAlertStream({
     onAlertCreated: (newAlert) => {
@@ -70,8 +69,6 @@ export const Dashboard: React.FC = () => {
       if (hotspotsData.status === 'fulfilled') setHotspots(hotspotsData.value.clusters?.slice(0, 4) || []);
       if (caseStatsData.status === 'fulfilled') setCaseStats(caseStatsData.value);
 
-
-      // If all critical requests failed, show error
       if (analyticsData.status === 'rejected' && statsData.status === 'rejected' && alertsData.status === 'rejected') {
         const primaryError = (statsData as any).reason || (analyticsData as any).reason;
         throw new Error(primaryError?.message || 'Failed to connect to backend intelligence services.');
@@ -97,35 +94,35 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div>
+    <div style={{ backgroundColor: '#000000', minHeight: '100%' }}>
       {/* Top Controls & Live Status */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: '#f8fafc' }}>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: 700, margin: 0, color: '#f5f5f5' }}>
             National Cyber Threat Operations Command
           </h2>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#a0a0a0' }}>
             Real-time fraud surveillance, high-risk mule ring detection, and golden-hour asset recovery.
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {isAuthorizedForDemo && (
             <button
               onClick={() => setIsDemoModalOpen(true)}
               style={{
-                background: 'linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
-                color: '#00f2fe',
-                border: '1px solid rgba(0, 242, 254, 0.5)',
+                backgroundColor: '#0c0c0c',
+                color: '#0088ff',
+                border: '1px solid rgba(0, 136, 255, 0.4)',
                 padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 0 12px rgba(0, 242, 254, 0.2)',
+                transition: 'all 0.15s ease',
               }}
             >
               <span>⚡</span>
@@ -135,31 +132,35 @@ export const Dashboard: React.FC = () => {
           <button
             onClick={() => navigate('/alerts')}
             style={{
-              backgroundColor: 'rgba(0, 242, 254, 0.15)',
-              color: '#00f2fe',
-              border: '1px solid rgba(0, 242, 254, 0.4)',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
+              backgroundColor: '#111111',
+              color: '#f5f5f5',
+              border: '1px solid #282828',
+              padding: '8px 14px',
+              borderRadius: '6px',
+              fontSize: '0.82rem',
               fontWeight: 600,
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            🚨 View Live Alerts ({alertStats?.total_alerts ?? recentAlerts.length})
+            <span>🚨</span>
+            <span>View Live Alerts ({alertStats?.total_alerts ?? recentAlerts.length})</span>
           </button>
           <button
             onClick={loadDashboardData}
             style={{
-              backgroundColor: '#121a2d',
-              color: '#cbd5e1',
-              border: '1px solid #334155',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
+              backgroundColor: '#111111',
+              color: '#a0a0a0',
+              border: '1px solid #242424',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              fontSize: '0.82rem',
               cursor: 'pointer',
             }}
           >
-            🔄 Refresh Feeds
+            🔄 Refresh
           </button>
         </div>
       </div>
@@ -210,42 +211,50 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Grid: Live Alerts & Geographic Hotspots */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: '20px', marginBottom: '24px' }}>
         {/* Recent Alerts Feed */}
-        <div style={{ backgroundColor: '#0d1322', border: '1px solid #1e293b', borderRadius: '10px', padding: '20px' }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '8px', padding: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1.2rem' }}>🚨</span>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#f8fafc' }}>Recent High-Priority Alerts</h3>
+              <span style={{ fontSize: '1.1rem' }}>🚨</span>
+              <h3 style={{ margin: 0, fontSize: '1rem', color: '#f5f5f5', fontWeight: 700 }}>Recent High-Priority Alerts</h3>
             </div>
-            <Link to="/alerts" style={{ color: '#00f2fe', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
+            <Link to="/alerts" style={{ color: '#0088ff', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
               View All Alerts →
             </Link>
           </div>
 
           {recentAlerts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>No alerts recorded yet.</div>
+            <div style={{ textAlign: 'center', padding: '32px', color: '#707070' }}>No alerts recorded yet.</div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {recentAlerts.map((alert) => (
                 <div
                   key={alert.id || alert.alert_id}
                   onClick={() => navigate(`/alerts/${alert.alert_id || alert.id}`)}
                   style={{
-                    backgroundColor: '#121a2d',
-                    border: '1px solid #1e293b',
-                    borderRadius: '8px',
-                    padding: '12px 16px',
+                    backgroundColor: '#111111',
+                    border: '1px solid #242424',
+                    borderRadius: '6px',
+                    padding: '12px 14px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    transition: 'border-color 0.15s ease',
+                    transition: 'border-color 0.15s ease, background-color 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#161616';
+                    e.currentTarget.style.borderColor = '#333333';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#111111';
+                    e.currentTarget.style.borderColor = '#242424';
                   }}
                 >
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <strong style={{ fontSize: '0.85rem', color: '#f8fafc', fontFamily: 'monospace' }}>
+                      <strong style={{ fontSize: '0.82rem', color: '#f5f5f5', fontFamily: 'monospace' }}>
                         {alert.alert_id}
                       </strong>
                       <Badge severity={alert.severity} size="sm">
@@ -255,16 +264,16 @@ export const Dashboard: React.FC = () => {
                         {alert.status}
                       </Badge>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                      Account: <span style={{ color: '#cbd5e1', fontFamily: 'monospace' }}>{alert.account_id}</span> • Type: {alert.alert_type}
+                    <div style={{ fontSize: '0.74rem', color: '#a0a0a0' }}>
+                      Account: <span style={{ color: '#d4d4d4', fontFamily: 'monospace' }}>{alert.account_id}</span> • Type: {alert.alert_type}
                     </div>
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: alert.risk_score >= 80 ? '#ef4444' : '#00f2fe', fontFamily: 'monospace' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: alert.risk_score >= 80 ? '#ef4444' : '#0088ff', fontFamily: 'monospace' }}>
                       {alert.risk_score.toFixed(1)}
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    <div style={{ fontSize: '0.68rem', color: '#707070' }}>
                       {alert.created_at ? new Date(alert.created_at).toLocaleTimeString() : 'Recent'}
                     </div>
                   </div>
@@ -275,41 +284,50 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Hotspots & Cash-Out Corridor Overview */}
-        <div style={{ backgroundColor: '#0d1322', border: '1px solid #1e293b', borderRadius: '10px', padding: '20px' }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '8px', padding: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1.2rem' }}>📍</span>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#f8fafc' }}>Cyber Threat Hotspots & Corridors</h3>
+              <span style={{ fontSize: '1.1rem' }}>📍</span>
+              <h3 style={{ margin: 0, fontSize: '1rem', color: '#f5f5f5', fontWeight: 700 }}>Cyber Threat Hotspots & Corridors</h3>
             </div>
-            <Link to="/map" style={{ color: '#00f2fe', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
+            <Link to="/map" style={{ color: '#0088ff', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
               Open Full Map & Predictions →
             </Link>
           </div>
 
           {hotspots.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>No cluster hotspots active.</div>
+            <div style={{ textAlign: 'center', padding: '32px', color: '#707070' }}>No cluster hotspots active.</div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {hotspots.map((cluster) => (
                 <div
                   key={cluster.cluster_id}
                   onClick={() => navigate('/map')}
                   style={{
-                    backgroundColor: '#121a2d',
-                    border: '1px solid #1e293b',
-                    borderRadius: '8px',
-                    padding: '12px 16px',
+                    backgroundColor: '#111111',
+                    border: '1px solid #242424',
+                    borderRadius: '6px',
+                    padding: '12px 14px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    transition: 'border-color 0.15s ease, background-color 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#161616';
+                    e.currentTarget.style.borderColor = '#333333';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#111111';
+                    e.currentTarget.style.borderColor = '#242424';
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#f8fafc', marginBottom: '4px' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#f5f5f5', marginBottom: '4px' }}>
                       {cluster.reference_hub_name || `Cluster #${cluster.cluster_id}`}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#a0a0a0' }}>
                       Incidents: <strong>{cluster.incident_count}</strong> • Pattern: {cluster.dominant_pattern}
                     </div>
                   </div>
@@ -318,7 +336,7 @@ export const Dashboard: React.FC = () => {
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f59e0b', fontFamily: 'monospace' }}>
                       ₹{(cluster.total_loss_inr / 100000).toFixed(1)} Lakhs
                     </span>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b' }}>Radius: {cluster.radius_km.toFixed(1)} km</div>
+                    <div style={{ fontSize: '0.68rem', color: '#707070' }}>Radius: {cluster.radius_km.toFixed(1)} km</div>
                   </div>
                 </div>
               ))}
@@ -328,13 +346,13 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Recent Cases Section */}
-      <div style={{ backgroundColor: '#0d1322', border: '1px solid #1e293b', borderRadius: '10px', padding: '20px' }}>
+      <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '8px', padding: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.2rem' }}>📁</span>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#f8fafc' }}>Active LEA Investigation Dockets</h3>
+            <span style={{ fontSize: '1.1rem' }}>📁</span>
+            <h3 style={{ margin: 0, fontSize: '1rem', color: '#f5f5f5', fontWeight: 700 }}>Active LEA Investigation Dockets</h3>
           </div>
-          <Link to="/cases" style={{ color: '#00f2fe', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
+          <Link to="/cases" style={{ color: '#0088ff', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
             All Cases ({caseStats?.total_cases ?? recentCases.length}) →
           </Link>
         </div>
@@ -349,32 +367,32 @@ export const Dashboard: React.FC = () => {
               marginBottom: 16,
             }}
           >
-            <div style={{ background: '#121a2d', padding: '10px 12px', borderRadius: 6, border: '1px solid #1e293b' }}>
-              <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Active Cases</div>
+            <div style={{ background: '#111111', padding: '10px 12px', borderRadius: 6, border: '1px solid #242424' }}>
+              <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>Active Cases</div>
               <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f59e0b', marginTop: 2 }}>
                 {caseStats.active_cases}
               </div>
             </div>
-            <div style={{ background: '#121a2d', padding: '10px 12px', borderRadius: 6, border: '1px solid #1e293b' }}>
-              <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Requires Investigation</div>
+            <div style={{ background: '#111111', padding: '10px 12px', borderRadius: 6, border: '1px solid #242424' }}>
+              <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>Requires Investigation</div>
               <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ef4444', marginTop: 2 }}>
                 {caseStats.requiring_investigation}
               </div>
             </div>
-            <div style={{ background: '#121a2d', padding: '10px 12px', borderRadius: 6, border: '1px solid #1e293b' }}>
-              <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Assigned To Me</div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#00f2fe', marginTop: 2 }}>
+            <div style={{ background: '#111111', padding: '10px 12px', borderRadius: 6, border: '1px solid #242424' }}>
+              <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>Assigned To Me</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0088ff', marginTop: 2 }}>
                 {caseStats.assigned_to_user}
               </div>
             </div>
-            <div style={{ background: '#121a2d', padding: '10px 12px', borderRadius: 6, border: '1px solid #1e293b' }}>
-              <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Recently Created</div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc', marginTop: 2 }}>
+            <div style={{ background: '#111111', padding: '10px 12px', borderRadius: 6, border: '1px solid #242424' }}>
+              <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>Recently Created</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f5f5f5', marginTop: 2 }}>
                 {caseStats.recently_created}
               </div>
             </div>
-            <div style={{ background: '#121a2d', padding: '10px 12px', borderRadius: 6, border: '1px solid #1e293b' }}>
-              <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase' }}>Recently Resolved</div>
+            <div style={{ background: '#111111', padding: '10px 12px', borderRadius: 6, border: '1px solid #242424' }}>
+              <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>Recently Resolved</div>
               <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#10b981', marginTop: 2 }}>
                 {caseStats.recently_resolved}
               </div>
@@ -382,16 +400,15 @@ export const Dashboard: React.FC = () => {
           </div>
         )}
 
-
         {recentCases.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+          <div style={{ textAlign: 'center', padding: '24px', color: '#707070' }}>
             No active case dockets opened yet. Open an alert to initiate a formal case docket.
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #1e293b', color: '#64748b', textTransform: 'uppercase', fontSize: '0.7rem' }}>
+                <tr style={{ borderBottom: '1px solid #202020', color: '#707070', textTransform: 'uppercase', fontSize: '0.7rem', backgroundColor: '#050505' }}>
                   <th style={{ padding: '8px 12px' }}>Case Number</th>
                   <th style={{ padding: '8px 12px' }}>Title</th>
                   <th style={{ padding: '8px 12px' }}>Priority</th>
@@ -405,9 +422,9 @@ export const Dashboard: React.FC = () => {
                 {recentCases.map((c) => (
                   <tr
                     key={c.id || c.case_number}
-                    style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)', color: '#cbd5e1' }}
+                    style={{ borderBottom: '1px solid #1a1a1a', color: '#d4d4d4' }}
                   >
-                    <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontWeight: 600, color: '#f8fafc' }}>
+                    <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontWeight: 600, color: '#f5f5f5' }}>
                       {c.case_number}
                     </td>
                     <td style={{ padding: '10px 12px' }}>{c.title}</td>
@@ -421,23 +438,24 @@ export const Dashboard: React.FC = () => {
                         {c.status}
                       </Badge>
                     </td>
-                    <td style={{ padding: '10px 12px', color: '#94a3b8' }}>
+                    <td style={{ padding: '10px 12px', color: '#a0a0a0' }}>
                       {c.assigned_investigator_name || 'Unassigned'}
                     </td>
-                    <td style={{ padding: '10px 12px', color: '#64748b' }}>
+                    <td style={{ padding: '10px 12px', color: '#707070' }}>
                       {new Date(c.created_at).toLocaleDateString()}
                     </td>
                     <td style={{ padding: '10px 12px' }}>
                       <button
                         onClick={() => navigate(`/cases/${c.case_number || c.id}`)}
                         style={{
-                          backgroundColor: 'rgba(0, 242, 254, 0.1)',
-                          color: '#00f2fe',
-                          border: '1px solid rgba(0, 242, 254, 0.3)',
+                          backgroundColor: '#161616',
+                          color: '#f5f5f5',
+                          border: '1px solid #2a2a2a',
                           padding: '4px 10px',
                           borderRadius: '4px',
                           fontSize: '0.75rem',
                           cursor: 'pointer',
+                          transition: 'all 0.15s ease',
                         }}
                       >
                         Inspect

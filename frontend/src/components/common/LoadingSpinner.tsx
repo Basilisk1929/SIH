@@ -25,7 +25,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         justifyContent: 'center',
         padding: '40px 20px',
         minHeight: typeof minHeight === 'number' ? `${minHeight}px` : minHeight,
-        color: '#94a3b8',
+        color: '#a0a0a0',
         gap: '12px',
       }}
     >
@@ -33,8 +33,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         style={{
           width: `${pixelSize}px`,
           height: `${pixelSize}px`,
-          border: '3px solid rgba(0, 242, 254, 0.15)',
-          borderTopColor: '#00f2fe',
+          border: '3px solid #202020',
+          borderTopColor: '#0088ff',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
         }}

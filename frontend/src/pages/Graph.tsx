@@ -82,7 +82,7 @@ export const Graph: React.FC = () => {
 
   // Node coloring
   const getNodeColor = (label: string, isCenter = false) => {
-    if (isCenter) return { fill: '#00f2fe', stroke: '#fff', text: '#070a12' };
+    if (isCenter) return { fill: '#0088ff', stroke: '#fff', text: '#ffffff' };
     switch (label?.toUpperCase()) {
       case 'BANKACCOUNT':
       case 'ACCOUNT':
@@ -340,8 +340,8 @@ export const Graph: React.FC = () => {
             minHeight: 560,
             overflow: 'hidden',
             padding: 0,
-            background: 'radial-gradient(circle at center, #0f172a 0%, #070a12 100%)',
-            border: '1px solid var(--border-subtle)',
+            background: '#050505',
+            border: '1px solid #202020',
             borderRadius: 10,
             cursor: isDragging ? 'grabbing' : 'grab',
           }}
@@ -372,7 +372,7 @@ export const Graph: React.FC = () => {
                   refY="3"
                   orient="auto"
                 >
-                  <polygon points="0 0, 8 3, 0 6" fill="#00f2fe" opacity="0.8" />
+                  <polygon points="0 0, 8 3, 0 6" fill="#0088ff" opacity="0.8" />
                 </marker>
                 <marker
                   id="arrowhead-red"
@@ -394,7 +394,7 @@ export const Graph: React.FC = () => {
                   if (!sourceNode || !targetNode) return null;
 
                   const isHighVelocity = (edge.properties as any)?.time_delta_seconds && (edge.properties as any).time_delta_seconds < 300;
-                  const strokeColor = isHighVelocity ? '#ef4444' : 'rgba(0, 242, 254, 0.4)';
+                  const strokeColor = isHighVelocity ? '#ef4444' : 'rgba(0, 136, 255, 0.45)';
                   const marker = isHighVelocity ? 'url(#arrowhead-red)' : 'url(#arrowhead)';
 
                   const midX = (sourceNode.x + targetNode.x) / 2;
@@ -448,7 +448,7 @@ export const Graph: React.FC = () => {
                         <circle
                           r="26"
                           fill="none"
-                          stroke={isCenter ? '#00f2fe' : '#60a5fa'}
+                          stroke={isCenter ? '#0088ff' : '#60a5fa'}
                           strokeWidth="2"
                           strokeDasharray="4 2"
                           opacity="0.8"
@@ -510,7 +510,7 @@ export const Graph: React.FC = () => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#00f2fe' }} /> Center Focus
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#0088ff' }} /> Center Focus
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6' }} /> Bank Account

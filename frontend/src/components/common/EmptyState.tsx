@@ -27,22 +27,22 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         justifyContent: 'center',
         padding: '48px 24px',
         textAlign: 'center',
-        backgroundColor: '#0d1322',
-        border: '1px dashed #1e293b',
+        backgroundColor: '#0a0a0a',
+        border: '1px dashed #202020',
         borderRadius: '8px',
         margin: '16px 0',
       }}
     >
       <div style={{ fontSize: '2rem', marginBottom: '12px' }}>{icon}</div>
-      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', color: '#f8fafc' }}>{title}</h3>
-      <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: '#94a3b8', maxWidth: '400px' }}>{displayText}</p>
+      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', color: '#f5f5f5' }}>{title}</h3>
+      <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: '#a0a0a0', maxWidth: '400px' }}>{displayText}</p>
       {actionLabel && onAction && (
         <button
           onClick={onAction}
           style={{
-            backgroundColor: 'rgba(0, 242, 254, 0.15)',
-            color: '#00f2fe',
-            border: '1px solid rgba(0, 242, 254, 0.3)',
+            backgroundColor: '#141414',
+            color: '#f5f5f5',
+            border: '1px solid #262626',
             padding: '8px 16px',
             borderRadius: '6px',
             fontSize: '0.85rem',

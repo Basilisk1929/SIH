@@ -37,11 +37,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <div className="compliance-banner">
+      <div className="compliance-banner" style={{ backgroundColor: '#050505', borderBottom: '1px solid #1f1f1f', color: '#888888' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span>⚠️ SMART INDIA HACKATHON EVALUATION ENVIRONMENT</span>
-          <span style={{ color: '#94a3b8' }}>•</span>
-          <span>STRICT SYNTHETIC DATA MODE (ZERO REAL NCRP/BANK PII)</span>
+          <span style={{ color: '#f59e0b' }}>⚠️</span>
+          <span style={{ fontWeight: 600, color: '#a0a0a0' }}>SMART INDIA HACKATHON EVALUATION ENVIRONMENT</span>
+          <span style={{ color: '#404040' }}>•</span>
+          <span style={{ color: '#707070' }}>STRICT SYNTHETIC DATA MODE (ZERO REAL NCRP/BANK PII)</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem' }}>
@@ -55,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
                 boxShadow: isWsConnected ? '0 0 8px #10b981' : 'none',
               }}
             />
-            <span style={{ color: isWsConnected ? '#6ee7b7' : '#fcd34d' }}>
+            <span style={{ color: isWsConnected ? '#34d399' : '#fbbf24', fontWeight: 600 }}>
               {isWsConnected ? 'LIVE FEED (WEBSOCKET)' : 'OFFLINE STREAM'}
             </span>
           </div>
@@ -63,29 +64,41 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      <header className="top-navbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 className="page-title">{title}</h1>
+      <header
+        className="top-navbar"
+        style={{
+          backgroundColor: '#000000',
+          borderBottom: '1px solid #1f1f1f',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 28px',
+        }}
+      >
+        <h1 className="page-title" style={{ color: '#f5f5f5', fontSize: '1.2rem', fontWeight: 700 }}>
+          {title}
+        </h1>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           {/* SIH Demo Mode Button */}
           {isAuthorizedForDemo && (
             <button
               onClick={() => setIsDemoModalOpen(true)}
               title="Run controlled synthetic fraud scenario through complete live platform"
               style={{
-                background: 'linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
-                color: '#00f2fe',
-                border: '1px solid rgba(0, 242, 254, 0.5)',
-                padding: '6px 12px',
-                borderRadius: '8px',
+                backgroundColor: '#0a0a0a',
+                color: '#0088ff',
+                border: '1px solid rgba(0, 136, 255, 0.4)',
+                padding: '6px 14px',
+                borderRadius: '6px',
                 fontSize: '0.78rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 0 10px rgba(0, 242, 254, 0.2)',
                 letterSpacing: '0.04em',
+                transition: 'all 0.15s ease',
               }}
             >
               <span>⚡</span>
@@ -98,9 +111,9 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => navigate('/alerts')}
               style={{
-                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                backgroundColor: 'rgba(239, 68, 68, 0.12)',
                 color: '#f87171',
-                border: '1px solid rgba(239, 68, 68, 0.4)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
                 padding: '4px 10px',
                 borderRadius: '16px',
                 fontSize: '0.75rem',
@@ -118,16 +131,38 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* User profile & badge */}
           {user && (
-            <div className="officer-badge" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div className="officer-avatar">{getInitials(user.full_name, user.email)}</div>
+            <div
+              className="officer-badge"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                backgroundColor: '#0a0a0a',
+                border: '1px solid #202020',
+                padding: '5px 12px',
+                borderRadius: '20px',
+              }}
+            >
+              <div
+                className="officer-avatar"
+                style={{
+                  backgroundColor: '#161616',
+                  border: '1px solid #282828',
+                  color: '#f5f5f5',
+                }}
+              >
+                {getInitials(user.full_name, user.email)}
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{user.full_name || user.email}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#f5f5f5' }}>
+                    {user.full_name || user.email}
+                  </span>
                   <Badge role={user.role} size="sm">
                     {user.role}
                   </Badge>
                 </div>
-                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                <span style={{ fontSize: '0.7rem', color: '#707070' }}>
                   {user.badge_number ? `Badge #${user.badge_number} • ` : ''}
                   {user.department || 'Cyber Crime Division'}
                 </span>
@@ -138,14 +173,15 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={handleLogout}
                 title="Sign out of investigation session"
                 style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid #334155',
-                  color: '#94a3b8',
+                  backgroundColor: '#121212',
+                  border: '1px solid #262626',
+                  color: '#a0a0a0',
                   borderRadius: '6px',
-                  padding: '4px 8px',
+                  padding: '4px 10px',
                   fontSize: '0.75rem',
                   cursor: 'pointer',
                   marginLeft: '8px',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 Sign Out

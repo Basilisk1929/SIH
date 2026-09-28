@@ -81,47 +81,42 @@ export const Login: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#070a12',
+        backgroundColor: '#000000',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px',
-        backgroundImage: 'radial-gradient(ellipse at 50% 20%, rgba(0, 242, 254, 0.08), transparent 70%)',
       }}
     >
       <div
         style={{
           width: '100%',
           maxWidth: '460px',
-          backgroundColor: '#0d1322',
-          border: '1px solid #1e293b',
+          backgroundColor: '#0a0a0a',
+          border: '1px solid #202020',
           borderRadius: '12px',
           padding: '36px 32px',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px #161616',
         }}
       >
-        {/* Brand header */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div
+        {/* Official Brand Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+          <img
+            src="/cybershield-logo.png"
+            alt="CyberShield Official Logo"
             style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #00f2fe, #6366f1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              margin: '0 auto 14px auto',
-              boxShadow: '0 0 20px rgba(0, 242, 254, 0.3)',
+              width: '170px',
+              height: 'auto',
+              maxHeight: '130px',
+              margin: '0 auto 12px auto',
+              display: 'block',
+              objectFit: 'contain',
             }}
-          >
-            ⚡
-          </div>
-          <h2 style={{ fontSize: '1.4rem', color: '#f8fafc', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+          />
+          <h2 style={{ fontSize: '1.35rem', color: '#f5f5f5', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
             CyberShield-Intel
           </h2>
-          <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '6px 0 0 0' }}>
+          <p style={{ fontSize: '0.8rem', color: '#a0a0a0', margin: '4px 0 0 0' }}>
             Financial Cybercrime Intelligence & Mule Network Triage
           </p>
         </div>
@@ -129,29 +124,29 @@ export const Login: React.FC = () => {
         {/* Evaluation Banner */}
         <div
           style={{
-            backgroundColor: 'rgba(99, 102, 241, 0.12)',
-            border: '1px solid rgba(99, 102, 241, 0.35)',
+            backgroundColor: '#0f0f0f',
+            border: '1px solid #262626',
             borderRadius: '8px',
             padding: '12px 14px',
             fontSize: '0.74rem',
-            color: '#c7d2fe',
+            color: '#a0a0a0',
             marginBottom: '20px',
             lineHeight: 1.5,
           }}
         >
-          <div style={{ fontWeight: 700, letterSpacing: '0.04em', color: '#a5b4fc', marginBottom: '4px' }}>
+          <div style={{ fontWeight: 700, letterSpacing: '0.04em', color: '#f59e0b', marginBottom: '3px' }}>
             SMART INDIA HACKATHON — EVALUATION MODE
           </div>
-          <div>Public SIH demonstration environment — synthetic data only.</div>
+          <div>Public demonstration environment — synthetic data only.</div>
         </div>
 
         {/* Quick Demo Access */}
         <div style={{ marginBottom: '22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+            <label style={{ fontSize: '0.72rem', color: '#a0a0a0', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
               Quick Demo Access
             </label>
-            <span style={{ fontSize: '0.65rem', color: '#64748b' }}>One-Click Judge Login</span>
+            <span style={{ fontSize: '0.65rem', color: '#707070' }}>One-Click Judge Login</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
             {(['INVESTIGATOR', 'SUPERVISOR', 'ANALYST', 'ADMIN'] as UserRole[]).map((r) => (
@@ -161,15 +156,16 @@ export const Login: React.FC = () => {
                 disabled={submitting}
                 onClick={() => handleQuickDemoLogin(r)}
                 style={{
-                  backgroundColor: '#121a2d',
-                  border: '1px solid #334155',
-                  color: '#38bdf8',
+                  backgroundColor: '#121212',
+                  border: '1px solid #262626',
+                  color: '#e5e5e5',
                   borderRadius: '6px',
                   padding: '8px 4px',
                   fontSize: '0.68rem',
                   fontWeight: 700,
                   cursor: submitting ? 'not-allowed' : 'pointer',
                   textAlign: 'center',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 {r}
@@ -182,9 +178,9 @@ export const Login: React.FC = () => {
         {error && (
           <div
             style={{
-              backgroundColor: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid rgba(239, 68, 68, 0.4)',
-              color: '#fca5a5',
+              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.35)',
+              color: '#f87171',
               padding: '10px 14px',
               borderRadius: '6px',
               fontSize: '0.8rem',
@@ -198,7 +194,7 @@ export const Login: React.FC = () => {
         {/* Login form */}
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '6px', fontWeight: 500 }}>
+            <label style={{ fontSize: '0.8rem', color: '#a0a0a0', display: 'block', marginBottom: '6px', fontWeight: 500 }}>
               Officer Official Email / Username
             </label>
             <input
@@ -209,9 +205,9 @@ export const Login: React.FC = () => {
               required
               style={{
                 width: '100%',
-                backgroundColor: '#121a2d',
-                border: '1px solid #334155',
-                color: '#f8fafc',
+                backgroundColor: '#050505',
+                border: '1px solid #262626',
+                color: '#f5f5f5',
                 borderRadius: '6px',
                 padding: '10px 12px',
                 fontSize: '0.875rem',
@@ -222,7 +218,7 @@ export const Login: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '6px', fontWeight: 500 }}>
+            <label style={{ fontSize: '0.8rem', color: '#a0a0a0', display: 'block', marginBottom: '6px', fontWeight: 500 }}>
               Cryptographic Password
             </label>
             <input
@@ -232,9 +228,9 @@ export const Login: React.FC = () => {
               required
               style={{
                 width: '100%',
-                backgroundColor: '#121a2d',
-                border: '1px solid #334155',
-                color: '#f8fafc',
+                backgroundColor: '#050505',
+                border: '1px solid #262626',
+                color: '#f5f5f5',
                 borderRadius: '6px',
                 padding: '10px 12px',
                 fontSize: '0.875rem',
@@ -245,16 +241,16 @@ export const Login: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', fontSize: '0.8rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#a0a0a0', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                style={{ accentColor: '#00f2fe' }}
+                style={{ accentColor: '#0088ff' }}
               />
               Persist session in browser
             </label>
-            <span style={{ color: '#64748b' }}>v0.1.0 SIH</span>
+            <span style={{ color: '#707070' }}>v0.1.0 SIH</span>
           </div>
 
           <button
@@ -262,17 +258,17 @@ export const Login: React.FC = () => {
             disabled={submitting}
             style={{
               width: '100%',
-              backgroundColor: '#00f2fe',
-              color: '#070a12',
-              border: 'none',
+              backgroundColor: '#141414',
+              color: '#f5f5f5',
+              border: '1px solid #0088ff',
               borderRadius: '8px',
               padding: '12px',
               fontSize: '0.95rem',
               fontWeight: 700,
               cursor: submitting ? 'not-allowed' : 'pointer',
               letterSpacing: '0.02em',
-              boxShadow: '0 0 20px rgba(0, 242, 254, 0.3)',
-              transition: 'opacity 0.15s ease',
+              boxShadow: '0 0 12px rgba(0, 136, 255, 0.15)',
+              transition: 'all 0.15s ease',
               opacity: submitting ? 0.7 : 1,
             }}
           >
@@ -280,7 +276,7 @@ export const Login: React.FC = () => {
           </button>
         </form>
 
-        <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.72rem', color: '#64748b' }}>
+        <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.72rem', color: '#707070' }}>
           Restricted Law Enforcement Intelligence System • Authorized Personnel Only
         </div>
       </div>

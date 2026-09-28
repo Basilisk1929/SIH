@@ -145,8 +145,8 @@ export const AlertDetail: React.FC = () => {
       {/* Top Banner: Alert Header & Actions */}
       <div
         style={{
-          backgroundColor: '#0d1322',
-          border: '1px solid #1e293b',
+          backgroundColor: '#0a0a0a',
+          border: '1px solid #202020',
           borderRadius: '10px',
           padding: '24px',
           marginBottom: '24px',
@@ -155,7 +155,7 @@ export const AlertDetail: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0, fontFamily: 'monospace', color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0, fontFamily: 'monospace', color: '#f5f5f5' }}>
                 {alert.alert_id}
               </h2>
               <Badge severity={alert.severity} size="lg">
@@ -165,13 +165,13 @@ export const AlertDetail: React.FC = () => {
                 STATUS: {alert.status}
               </Badge>
               {alert.is_deduplicated && (
-                <span style={{ fontSize: '0.7rem', color: '#94a3b8', backgroundColor: '#1e293b', padding: '2px 8px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '0.7rem', color: '#a0a0a0', backgroundColor: '#141414', border: '1px solid #202020', padding: '2px 8px', borderRadius: '4px' }}>
                   Suppressed duplicate ({alert.duplicate_count || 1} hits)
                 </span>
               )}
             </div>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>
-              Triggered by {alert.triggered_entity_type} <span style={{ color: '#00f2fe', fontFamily: 'monospace' }}>{alert.triggered_entity_id}</span> on target account <span style={{ color: '#f8fafc', fontFamily: 'monospace' }}>{alert.account_id}</span>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#a0a0a0' }}>
+              Triggered by {alert.triggered_entity_type} <span style={{ color: '#0088ff', fontFamily: 'monospace' }}>{alert.triggered_entity_id}</span> on target account <span style={{ color: '#f5f5f5', fontFamily: 'monospace' }}>{alert.account_id}</span>
             </p>
           </div>
 
@@ -182,9 +182,9 @@ export const AlertDetail: React.FC = () => {
                 disabled={actionLoading}
                 onClick={() => handleStatusTransition('ACKNOWLEDGED')}
                 style={{
-                  backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                  backgroundColor: 'rgba(56, 189, 248, 0.1)',
                   color: '#38bdf8',
-                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
                   padding: '8px 14px',
                   borderRadius: '6px',
                   fontWeight: 600,
@@ -201,9 +201,9 @@ export const AlertDetail: React.FC = () => {
                 disabled={actionLoading}
                 onClick={() => handleStatusTransition('INVESTIGATING')}
                 style={{
-                  backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
                   color: '#f59e0b',
-                  border: '1px solid rgba(245, 158, 11, 0.4)',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
                   padding: '8px 14px',
                   borderRadius: '6px',
                   fontWeight: 600,
@@ -219,12 +219,12 @@ export const AlertDetail: React.FC = () => {
               <button
                 onClick={() => navigate(`/cases/${linkedCaseNumber}`)}
                 style={{
-                  backgroundColor: 'rgba(0, 242, 254, 0.15)',
-                  color: '#00f2fe',
-                  border: '1px solid rgba(0, 242, 254, 0.4)',
+                  backgroundColor: '#141414',
+                  color: '#f5f5f5',
+                  border: '1px solid #262626',
                   padding: '8px 16px',
                   borderRadius: '6px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: '0.8rem',
                   cursor: 'pointer',
                 }}
@@ -235,15 +235,14 @@ export const AlertDetail: React.FC = () => {
               <button
                 onClick={() => setIsCaseModalOpen(true)}
                 style={{
-                  backgroundColor: '#00f2fe',
-                  color: '#070a12',
+                  backgroundColor: '#0088ff',
+                  color: '#ffffff',
                   border: 'none',
                   padding: '8px 16px',
                   borderRadius: '6px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: '0.8rem',
                   cursor: 'pointer',
-                  boxShadow: '0 0 12px rgba(0, 242, 254, 0.3)',
                 }}
               >
                 📁 Open Case Docket
@@ -256,9 +255,9 @@ export const AlertDetail: React.FC = () => {
                 disabled={actionLoading}
                 onClick={() => handleStatusTransition('RESOLVED')}
                 style={{
-                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
                   color: '#10b981',
-                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
                   padding: '8px 14px',
                   borderRadius: '6px',
                   fontWeight: 600,
@@ -275,9 +274,9 @@ export const AlertDetail: React.FC = () => {
                 disabled={actionLoading}
                 onClick={() => handleStatusTransition('FALSE_POSITIVE')}
                 style={{
-                  backgroundColor: 'rgba(100, 116, 139, 0.15)',
-                  color: '#94a3b8',
-                  border: '1px solid rgba(100, 116, 139, 0.4)',
+                  backgroundColor: '#141414',
+                  color: '#a0a0a0',
+                  border: '1px solid #202020',
                   padding: '8px 14px',
                   borderRadius: '6px',
                   fontSize: '0.8rem',
@@ -291,7 +290,7 @@ export const AlertDetail: React.FC = () => {
         </div>
 
         {actionSuccess && (
-          <div style={{ marginTop: '16px', padding: '10px 14px', backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#6ee7b7', borderRadius: '6px', fontSize: '0.8rem' }}>
+          <div style={{ marginTop: '16px', padding: '10px 14px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: '#34d399', borderRadius: '6px', fontSize: '0.8rem' }}>
             {actionSuccess}
           </div>
         )}
@@ -300,21 +299,21 @@ export const AlertDetail: React.FC = () => {
       {/* Grid: 6 Evaluation Factors Breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '24px' }}>
         {/* Composite Score Card */}
-        <div style={{ backgroundColor: '#0d1322', border: '1px solid #1e293b', borderRadius: '10px', padding: '20px' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '10px', padding: '20px' }}>
+          <span style={{ fontSize: '0.75rem', color: '#a0a0a0', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
             Composite Calibrated Risk Score
           </span>
-          <div style={{ fontSize: '3rem', fontWeight: 800, color: alert.risk_score >= 80 ? '#ef4444' : '#00f2fe', fontFamily: 'monospace', margin: '10px 0' }}>
-            {alert.risk_score.toFixed(1)} <span style={{ fontSize: '1.2rem', color: '#64748b' }}>/ 100</span>
+          <div style={{ fontSize: '3rem', fontWeight: 800, color: alert.risk_score >= 80 ? '#ef4444' : '#0088ff', fontFamily: 'monospace', margin: '10px 0' }}>
+            {alert.risk_score.toFixed(1)} <span style={{ fontSize: '1.2rem', color: '#707070' }}>/ 100</span>
           </div>
-          <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.8rem', color: '#a0a0a0', lineHeight: 1.5 }}>
             Synthesized across ML XGBoost inference, velocity spike, mule graph degree, rapid cash-out ratio, spatial anomaly, and NCRP citizen complaint correlations.
           </p>
         </div>
 
         {/* 6 Contributing Factors Meters */}
-        <div style={{ backgroundColor: '#0d1322', border: '1px solid #1e293b', borderRadius: '10px', padding: '20px' }}>
-          <h4 style={{ margin: '0 0 14px 0', fontSize: '0.95rem', color: '#f8fafc' }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '10px', padding: '20px' }}>
+          <h4 style={{ margin: '0 0 14px 0', fontSize: '0.95rem', color: '#f5f5f5' }}>
             Multi-Engine Factor Breakdown
           </h4>
 
@@ -322,25 +321,25 @@ export const AlertDetail: React.FC = () => {
             {/* 1. ML Risk */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>1. XGBoost ML Risk Engine:</span>
-                <strong style={{ color: '#00f2fe', fontFamily: 'monospace' }}>
+                <span style={{ color: '#a0a0a0' }}>1. XGBoost ML Risk Engine:</span>
+                <strong style={{ color: '#0088ff', fontFamily: 'monospace' }}>
                   {flags.ml_risk?.score !== undefined ? `${flags.ml_risk.score.toFixed(1)}%` : 'Active'}
                 </strong>
               </div>
-              <div style={{ height: '6px', backgroundColor: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ width: `${flags.ml_risk?.score || 85}%`, height: '100%', backgroundColor: '#00f2fe' }} />
+              <div style={{ height: '6px', backgroundColor: '#1a1a1a', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ width: `${flags.ml_risk?.score || 85}%`, height: '100%', backgroundColor: '#0088ff' }} />
               </div>
             </div>
 
             {/* 2. Velocity */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>2. Velocity Surge (Last 1h):</span>
+                <span style={{ color: '#a0a0a0' }}>2. Velocity Surge (Last 1h):</span>
                 <strong style={{ color: '#f59e0b', fontFamily: 'monospace' }}>
                   {flags.velocity?.transactions_last_1h ?? 8} txns
                 </strong>
               </div>
-              <div style={{ height: '6px', backgroundColor: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '6px', backgroundColor: '#1a1a1a', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{ width: '85%', height: '100%', backgroundColor: '#f59e0b' }} />
               </div>
             </div>
@@ -348,12 +347,12 @@ export const AlertDetail: React.FC = () => {
             {/* 3. Graph Degree */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>3. Mule Network Degree:</span>
+                <span style={{ color: '#a0a0a0' }}>3. Mule Network Degree:</span>
                 <strong style={{ color: '#ef4444', fontFamily: 'monospace' }}>
                   {flags.graph?.degree ?? 14} connections
                 </strong>
               </div>
-              <div style={{ height: '6px', backgroundColor: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '6px', backgroundColor: '#1a1a1a', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{ width: '70%', height: '100%', backgroundColor: '#ef4444' }} />
               </div>
             </div>
@@ -361,12 +360,12 @@ export const AlertDetail: React.FC = () => {
             {/* 4. Cash-out */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>4. Rapid Cash-Out Ratio:</span>
+                <span style={{ color: '#a0a0a0' }}>4. Rapid Cash-Out Ratio:</span>
                 <strong style={{ color: '#f59e0b', fontFamily: 'monospace' }}>
                   {flags.cashout?.cashout_ratio ? `${(flags.cashout.cashout_ratio * 100).toFixed(0)}%` : '94%'}
                 </strong>
               </div>
-              <div style={{ height: '6px', backgroundColor: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '6px', backgroundColor: '#1a1a1a', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{ width: '94%', height: '100%', backgroundColor: '#f59e0b' }} />
               </div>
             </div>
@@ -374,10 +373,10 @@ export const AlertDetail: React.FC = () => {
             {/* 5. Geographic Anomaly */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>5. Geospatial Anomaly / Corridor:</span>
+                <span style={{ color: '#a0a0a0' }}>5. Geospatial Anomaly / Corridor:</span>
                 <strong style={{ color: '#10b981', fontFamily: 'monospace' }}>Detected</strong>
               </div>
-              <div style={{ height: '6px', backgroundColor: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '6px', backgroundColor: '#1a1a1a', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{ width: '60%', height: '100%', backgroundColor: '#10b981' }} />
               </div>
             </div>
@@ -385,12 +384,12 @@ export const AlertDetail: React.FC = () => {
             {/* 6. Complaint Linkage */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>6. NCRP Complaint Corroboration:</span>
+                <span style={{ color: '#a0a0a0' }}>6. NCRP Complaint Corroboration:</span>
                 <strong style={{ color: '#a855f7', fontFamily: 'monospace' }}>
                   {flags.complaint?.prior_complaints_count ?? 2} prior reports
                 </strong>
               </div>
-              <div style={{ height: '6px', backgroundColor: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '6px', backgroundColor: '#1a1a1a', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{ width: '80%', height: '100%', backgroundColor: '#a855f7' }} />
               </div>
             </div>
@@ -399,11 +398,11 @@ export const AlertDetail: React.FC = () => {
       </div>
 
       {/* Explanations List from Engine */}
-      <div style={{ backgroundColor: '#0d1322', border: '1px solid #1e293b', borderRadius: '10px', padding: '20px', marginBottom: '24px' }}>
-        <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: '#f8fafc' }}>
+      <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '10px', padding: '20px', marginBottom: '24px' }}>
+        <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: '#f5f5f5' }}>
           Tactical Evidentiary Explanations (Alert Engine)
         </h4>
-        <ul style={{ margin: '0 0 0 20px', padding: 0, color: '#cbd5e1', fontSize: '0.85rem', lineHeight: 1.6 }}>
+        <ul style={{ margin: '0 0 0 20px', padding: 0, color: '#a0a0a0', fontSize: '0.85rem', lineHeight: 1.6 }}>
           {(flags.explanations || [
             'Excessive transaction velocity (8 transactions executed in last 60 minutes)',
             'Disproportionate cash-out ratio (94% of credited funds dissipated immediately)',
@@ -417,32 +416,32 @@ export const AlertDetail: React.FC = () => {
 
       {/* Quick Links: Account, Transactions, Graph */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ backgroundColor: '#121a2d', border: '1px solid #1e293b', borderRadius: '8px', padding: '16px' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Target Bank Account</span>
-          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f8fafc', fontFamily: 'monospace', margin: '4px 0' }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '8px', padding: '16px' }}>
+          <span style={{ fontSize: '0.75rem', color: '#707070' }}>Target Bank Account</span>
+          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f5f5f5', fontFamily: 'monospace', margin: '4px 0' }}>
             {alert.account_id}
           </div>
-          <Link to={`/accounts/${alert.account_id}`} style={{ color: '#00f2fe', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
+          <Link to={`/accounts/${alert.account_id}`} style={{ color: '#0088ff', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
             Inspect Full Account Dossier →
           </Link>
         </div>
 
-        <div style={{ backgroundColor: '#121a2d', border: '1px solid #1e293b', borderRadius: '8px', padding: '16px' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Flagged Transaction</span>
-          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f8fafc', fontFamily: 'monospace', margin: '4px 0' }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '8px', padding: '16px' }}>
+          <span style={{ fontSize: '0.75rem', color: '#707070' }}>Flagged Transaction</span>
+          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f5f5f5', fontFamily: 'monospace', margin: '4px 0' }}>
             {alert.transaction_id || 'TXN_BURST_LINKED'}
           </div>
-          <Link to="/transactions" style={{ color: '#00f2fe', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
+          <Link to="/transactions" style={{ color: '#0088ff', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
             Inspect Transaction Ledger →
           </Link>
         </div>
 
-        <div style={{ backgroundColor: '#121a2d', border: '1px solid #1e293b', borderRadius: '8px', padding: '16px' }}>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Mule Network Topology</span>
-          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f8fafc', margin: '4px 0' }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '8px', padding: '16px' }}>
+          <span style={{ fontSize: '0.75rem', color: '#707070' }}>Mule Network Topology</span>
+          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f5f5f5', margin: '4px 0' }}>
             Neo4j Evidence Graph
           </div>
-          <Link to={`/graph?account_number=${alert.account_id}`} style={{ color: '#00f2fe', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
+          <Link to={`/graph?account_number=${alert.account_id}`} style={{ color: '#0088ff', fontSize: '0.8rem', textDecoration: 'none', fontWeight: 600 }}>
             Visualize Link Analysis Graph →
           </Link>
         </div>
@@ -468,7 +467,7 @@ export const AlertDetail: React.FC = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -478,22 +477,22 @@ export const AlertDetail: React.FC = () => {
         >
           <div
             style={{
-              backgroundColor: '#0d1322',
-              border: '1px solid #1e293b',
+              backgroundColor: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: '12px',
               padding: '28px',
               width: '100%',
               maxWidth: '540px',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.8)',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.9)',
             }}
           >
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#f8fafc' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#f5f5f5' }}>
               📁 Open Formal LEA Case Docket
             </h3>
 
             <form onSubmit={handleCreateCaseSubmit}>
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.8rem', color: '#a0a0a0', display: 'block', marginBottom: '6px' }}>
                   Case Title
                 </label>
                 <input
@@ -503,9 +502,9 @@ export const AlertDetail: React.FC = () => {
                   required
                   style={{
                     width: '100%',
-                    backgroundColor: '#121a2d',
-                    border: '1px solid #334155',
-                    color: '#f8fafc',
+                    backgroundColor: '#050505',
+                    border: '1px solid #202020',
+                    color: '#f5f5f5',
                     borderRadius: '6px',
                     padding: '8px 12px',
                     fontSize: '0.85rem',
@@ -514,7 +513,7 @@ export const AlertDetail: React.FC = () => {
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.8rem', color: '#a0a0a0', display: 'block', marginBottom: '6px' }}>
                   Investigative Rationale & Triage Notes
                 </label>
                 <textarea
@@ -524,9 +523,9 @@ export const AlertDetail: React.FC = () => {
                   rows={4}
                   style={{
                     width: '100%',
-                    backgroundColor: '#121a2d',
-                    border: '1px solid #334155',
-                    color: '#f8fafc',
+                    backgroundColor: '#050505',
+                    border: '1px solid #202020',
+                    color: '#f5f5f5',
                     borderRadius: '6px',
                     padding: '8px 12px',
                     fontSize: '0.85rem',
@@ -540,9 +539,9 @@ export const AlertDetail: React.FC = () => {
                   type="button"
                   onClick={() => setIsCaseModalOpen(false)}
                   style={{
-                    backgroundColor: '#1e293b',
-                    color: '#cbd5e1',
-                    border: '1px solid #334155',
+                    backgroundColor: '#141414',
+                    color: '#a0a0a0',
+                    border: '1px solid #202020',
                     padding: '8px 16px',
                     borderRadius: '6px',
                     fontSize: '0.85rem',
@@ -555,13 +554,13 @@ export const AlertDetail: React.FC = () => {
                   type="submit"
                   disabled={actionLoading}
                   style={{
-                    backgroundColor: '#00f2fe',
-                    color: '#070a12',
+                    backgroundColor: '#0088ff',
+                    color: '#ffffff',
                     border: 'none',
                     padding: '8px 20px',
                     borderRadius: '6px',
                     fontSize: '0.85rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     cursor: actionLoading ? 'not-allowed' : 'pointer',
                   }}
                 >

@@ -303,7 +303,7 @@ export const AccountDetail: React.FC = () => {
       {/* Multi-Hop Graph Link Section */}
       <div className="stat-card" style={{ padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--accent-cyan)' }}>
+          <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-primary)' }}>
             🕸️ Multi-Hop Transaction & Shared Identifier Topology
           </h3>
           <Link
@@ -312,9 +312,9 @@ export const AccountDetail: React.FC = () => {
             style={{
               padding: '6px 14px',
               fontSize: '0.8rem',
-              background: 'rgba(0, 242, 254, 0.1)',
-              border: '1px solid rgba(0, 242, 254, 0.3)',
-              color: 'var(--accent-cyan)',
+              background: '#141414',
+              border: '1px solid #262626',
+              color: '#f5f5f5',
               textDecoration: 'none',
               borderRadius: 6,
             }}

@@ -344,12 +344,12 @@ export const CaseDetail: React.FC = () => {
                 style={{
                   fontSize: '0.8rem',
                   fontFamily: 'var(--font-mono)',
-                  color: 'var(--accent-cyan)',
+                  color: '#0088ff',
                   textDecoration: 'none',
-                  background: 'rgba(0, 242, 254, 0.1)',
+                  background: '#141414',
                   padding: '3px 8px',
                   borderRadius: 4,
-                  border: '1px solid rgba(0, 242, 254, 0.3)',
+                  border: '1px solid #262626',
                 }}
               >
                 Origin: {caseData.alert_id} ↗
@@ -378,8 +378,8 @@ export const CaseDetail: React.FC = () => {
                 }}
 
                 style={{
-                  background: 'rgba(56, 189, 248, 0.12)',
-                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  background: 'rgba(56, 189, 248, 0.1)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
                   color: '#38bdf8',
                   padding: '8px 14px',
                   borderRadius: 6,
@@ -397,9 +397,9 @@ export const CaseDetail: React.FC = () => {
                 className="btn-action"
                 onClick={() => setShowResolveModal(true)}
                 style={{
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  border: '1px solid #10b981',
-                  color: '#6ee7b7',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  color: '#34d399',
                   padding: '8px 14px',
                   borderRadius: 6,
                   fontWeight: 600,
@@ -416,8 +416,8 @@ export const CaseDetail: React.FC = () => {
                 className="btn-action"
                 onClick={() => setShowCloseModal(true)}
                 style={{
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
                   color: '#f87171',
                   padding: '8px 14px',
                   borderRadius: 6,
@@ -437,9 +437,9 @@ export const CaseDetail: React.FC = () => {
                 onClick={handleExportDossier}
                 disabled={exportLoading}
                 style={{
-                  background: 'linear-gradient(135deg, rgba(0,242,254,0.15), rgba(79,172,254,0.15))',
-                  border: '1px solid rgba(0, 242, 254, 0.4)',
-                  color: 'var(--accent-cyan)',
+                  background: '#141414',
+                  border: '1px solid #262626',
+                  color: '#f5f5f5',
                   padding: '8px 14px',
                   borderRadius: 6,
                   fontWeight: 600,
@@ -565,10 +565,10 @@ export const CaseDetail: React.FC = () => {
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
             style={{
-              background: activeTab === tab.key ? 'rgba(0, 242, 254, 0.12)' : 'none',
+              background: activeTab === tab.key ? '#141414' : 'none',
               border: 'none',
-              borderBottom: activeTab === tab.key ? '2px solid var(--accent-cyan)' : '2px solid transparent',
-              color: activeTab === tab.key ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+              borderBottom: activeTab === tab.key ? '2px solid #0088ff' : '2px solid transparent',
+              color: activeTab === tab.key ? '#0088ff' : 'var(--text-secondary)',
               padding: '10px 16px',
               fontSize: '0.85rem',
               fontWeight: 600,
@@ -872,7 +872,7 @@ export const CaseDetail: React.FC = () => {
                       ev.evidence_type === 'ALERT'
                         ? '#ef4444'
                         : ev.evidence_type === 'ACCOUNT'
-                        ? '#00f2fe'
+                        ? '#0088ff'
                         : ev.evidence_type === 'TRANSACTION'
                         ? '#f59e0b'
                         : '#10b981'
@@ -1197,8 +1197,8 @@ export const CaseDetail: React.FC = () => {
             style={{
               maxWidth: 520,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
             }}
@@ -1357,8 +1357,8 @@ export const CaseDetail: React.FC = () => {
             style={{
               maxWidth: 500,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
             }}
@@ -1469,8 +1469,8 @@ export const CaseDetail: React.FC = () => {
             style={{
               maxWidth: 540,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
             }}
@@ -1593,7 +1593,7 @@ export const CaseDetail: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(7, 10, 18, 0.85)',
+            background: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
@@ -1607,8 +1607,8 @@ export const CaseDetail: React.FC = () => {
             style={{
               maxWidth: 480,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
             }}
@@ -1682,7 +1682,7 @@ export const CaseDetail: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(7, 10, 18, 0.85)',
+            background: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
@@ -1696,14 +1696,14 @@ export const CaseDetail: React.FC = () => {
             style={{
               maxWidth: 640,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--accent-cyan)' }}>
+              <h2 style={{ fontSize: '1.2rem', margin: 0, color: '#f5f5f5' }}>
                 ⚖️ Forensic Intelligence Dossier Export
               </h2>
               <button
@@ -1723,7 +1723,7 @@ export const CaseDetail: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: '0.88rem' }}>
               <div>
                 <span style={{ color: 'var(--text-muted)' }}>Export Reference ID: </span>
-                <strong style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
+                <strong style={{ fontFamily: 'var(--font-mono)', color: '#0088ff' }}>
                   {exportResult.export_id}
                 </strong>
               </div>
@@ -1758,8 +1758,8 @@ export const CaseDetail: React.FC = () => {
 
               <div
                 style={{
-                  background: 'rgba(0, 242, 254, 0.05)',
-                  border: '1px solid rgba(0, 242, 254, 0.2)',
+                  background: '#141414',
+                  border: '1px solid #202020',
                   borderRadius: 6,
                   padding: 10,
                   fontSize: '0.78rem',

@@ -111,9 +111,9 @@ export const Transactions: React.FC = () => {
           <button
             className="btn-action"
             style={{
-              background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
-              color: '#070a12',
-              fontWeight: 700,
+              background: '#0088ff',
+              color: '#ffffff',
+              fontWeight: 600,
               border: 'none',
               padding: '9px 16px',
               borderRadius: 6,
@@ -244,8 +244,8 @@ export const Transactions: React.FC = () => {
                         onClick={() => setSelectedTxn(t)}
                         style={{
                           cursor: 'pointer',
-                          backgroundColor: isSelected ? 'rgba(0, 242, 254, 0.08)' : undefined,
-                          borderLeft: isSelected ? '3px solid var(--accent-cyan)' : '3px solid transparent',
+                          backgroundColor: isSelected ? '#141414' : undefined,
+                          borderLeft: isSelected ? '3px solid #0088ff' : '3px solid transparent',
                         }}
                       >
                         <td>
@@ -407,8 +407,8 @@ export const Transactions: React.FC = () => {
               </div>
 
               {/* Real ML explanation box */}
-              <div style={{ background: 'rgba(0, 242, 254, 0.05)', border: '1px solid rgba(0, 242, 254, 0.2)', borderRadius: 6, padding: 12 }}>
-                <div style={{ fontWeight: 600, color: 'var(--accent-cyan)', fontSize: '0.85rem', marginBottom: 6 }}>
+              <div style={{ background: '#141414', border: '1px solid #202020', borderRadius: 6, padding: 12 }}>
+                <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 6 }}>
                   🤖 XGBoost Inference & Risk Attribution
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
@@ -464,7 +464,7 @@ export const Transactions: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(7, 10, 18, 0.85)',
+            background: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
@@ -478,8 +478,8 @@ export const Transactions: React.FC = () => {
             style={{
               maxWidth: 700,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
               maxHeight: '90vh',
@@ -488,7 +488,7 @@ export const Transactions: React.FC = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div>
-                <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--accent-cyan)' }}>
+                <h2 style={{ fontSize: '1.2rem', margin: 0, color: '#f5f5f5' }}>
                   ⚡ End-to-End Transaction Pipeline Evaluation
                 </h2>
                 <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -770,9 +770,9 @@ export const Transactions: React.FC = () => {
                     disabled={evaluating}
                     className="btn-action"
                     style={{
-                      background: 'var(--accent-cyan)',
-                      color: '#070a12',
-                      fontWeight: 700,
+                      background: '#0088ff',
+                      color: '#ffffff',
+                      fontWeight: 600,
                       border: 'none',
                       padding: '8px 20px',
                       borderRadius: 6,

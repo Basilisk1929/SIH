@@ -105,7 +105,7 @@ export const Complaints: React.FC = () => {
   const getEntityBadgeColor = (label: string) => {
     switch (label.toUpperCase()) {
       case 'ACCOUNT':
-        return { bg: 'rgba(0, 242, 254, 0.15)', border: '#00f2fe', text: '#00f2fe' };
+        return { bg: 'rgba(0, 136, 255, 0.15)', border: '#0088ff', text: '#60a5fa' };
       case 'UPI_ID':
         return { bg: 'rgba(99, 102, 241, 0.15)', border: '#6366f1', text: '#c7d2fe' };
       case 'PHONE':
@@ -141,9 +141,9 @@ export const Complaints: React.FC = () => {
         <button
           className="btn-action"
           style={{
-            background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
-            color: '#070a12',
-            fontWeight: 700,
+            background: '#0088ff',
+            color: '#ffffff',
+            fontWeight: 600,
             border: 'none',
             padding: '9px 16px',
             borderRadius: 6,
@@ -262,12 +262,12 @@ export const Complaints: React.FC = () => {
                         onClick={() => handleSelectComplaint(c)}
                         style={{
                           cursor: 'pointer',
-                          backgroundColor: isSelected ? 'rgba(0, 242, 254, 0.08)' : undefined,
-                          borderLeft: isSelected ? '3px solid var(--accent-cyan)' : '3px solid transparent',
+                          backgroundColor: isSelected ? '#141414' : undefined,
+                          borderLeft: isSelected ? '3px solid #0088ff' : '3px solid transparent',
                         }}
                       >
                         <td>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#0088ff', fontWeight: 600 }}>
                             {c.acknowledgement_no}
                           </div>
                           <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
@@ -422,9 +422,9 @@ export const Complaints: React.FC = () => {
                   width: '100%',
                   padding: '7px',
                   fontSize: '0.78rem',
-                  background: 'rgba(0, 242, 254, 0.08)',
-                  border: '1px solid rgba(0, 242, 254, 0.3)',
-                  color: 'var(--accent-cyan)',
+                  background: '#141414',
+                  border: '1px solid #262626',
+                  color: '#f5f5f5',
                   borderRadius: 4,
                   cursor: 'pointer',
                 }}
@@ -482,7 +482,7 @@ export const Complaints: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(7, 10, 18, 0.85)',
+            background: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
@@ -496,8 +496,8 @@ export const Complaints: React.FC = () => {
             style={{
               maxWidth: 760,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
               maxHeight: '90vh',
@@ -506,7 +506,7 @@ export const Complaints: React.FC = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div>
-                <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--accent-cyan)' }}>
+                <h2 style={{ fontSize: '1.25rem', margin: 0, color: '#f5f5f5' }}>
                   🧠 Cybercrime NLP Narrative Extraction Engine
                 </h2>
                 <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>

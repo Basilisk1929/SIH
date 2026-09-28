@@ -161,9 +161,9 @@ export const Cases: React.FC = () => {
           <button
             className="btn-action"
             style={{
-              background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
-              color: '#070a12',
-              fontWeight: 700,
+              background: '#0088ff',
+              color: '#ffffff',
+              fontWeight: 600,
               border: 'none',
               padding: '10px 18px',
               borderRadius: 6,
@@ -171,7 +171,6 @@ export const Cases: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              boxShadow: '0 0 14px rgba(0, 242, 254, 0.25)',
             }}
             onClick={() => setShowCreateModal(true)}
           >
@@ -183,7 +182,7 @@ export const Cases: React.FC = () => {
       {/* Metrics Bar */}
       {stats && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-          <div className="stat-card" style={{ padding: '14px 18px', borderLeft: '3px solid #00f2fe' }}>
+          <div className="stat-card" style={{ padding: '14px 18px', borderLeft: '3px solid #0088ff' }}>
             <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Total Case Dockets
             </div>
@@ -521,9 +520,9 @@ export const Cases: React.FC = () => {
                       style={{
                         padding: '6px 12px',
                         fontSize: '0.78rem',
-                        background: 'rgba(0, 242, 254, 0.1)',
-                        border: '1px solid rgba(0, 242, 254, 0.3)',
-                        color: 'var(--accent-cyan)',
+                        background: '#141414',
+                        border: '1px solid #262626',
+                        color: '#f5f5f5',
                         borderRadius: 4,
                         cursor: 'pointer',
                       }}
@@ -548,7 +547,7 @@ export const Cases: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(7, 10, 18, 0.85)',
+            background: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
@@ -562,8 +561,8 @@ export const Cases: React.FC = () => {
             style={{
               maxWidth: 600,
               width: '100%',
-              background: '#0d1322',
-              border: '1px solid var(--border-subtle)',
+              background: '#0a0a0a',
+              border: '1px solid #202020',
               borderRadius: 12,
               padding: 24,
             }}
@@ -746,9 +745,9 @@ export const Cases: React.FC = () => {
                   disabled={creating}
                   className="btn-action"
                   style={{
-                    background: 'var(--accent-cyan)',
-                    color: '#070a12',
-                    fontWeight: 700,
+                    background: '#0088ff',
+                    color: '#ffffff',
+                    fontWeight: 600,
                     border: 'none',
                     padding: '8px 20px',
                     borderRadius: 6,

@@ -74,9 +74,9 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
   return (
     <div
       style={{
-        backgroundColor: '#121a2d',
-        border: '1px solid #1e293b',
-        borderRadius: '10px',
+        backgroundColor: '#0a0a0a',
+        border: '1px solid #202020',
+        borderRadius: '8px',
         padding: '24px',
         margin: '16px 0',
       }}
@@ -85,27 +85,27 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '1.4rem' }}>🏧</span>
-            <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#f8fafc' }}>
+            <span style={{ fontSize: '1.3rem' }}>🏧</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f5f5f5', fontWeight: 700 }}>
               Likely Cash-Out Location Prediction
             </h3>
             <span
               style={{
                 fontSize: '0.65rem',
-                backgroundColor: 'rgba(0, 242, 254, 0.15)',
-                color: '#00f2fe',
+                backgroundColor: '#141414',
+                color: '#a0a0a0',
                 padding: '2px 8px',
                 borderRadius: '4px',
                 fontWeight: 700,
                 letterSpacing: '0.05em',
                 textTransform: 'uppercase',
-                border: '1px solid rgba(0, 242, 254, 0.3)',
+                border: '1px solid #282828',
               }}
             >
               Phase 11C Engine
             </span>
           </div>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#a0a0a0' }}>
             Predictive tactical ranking of operational Reserve Bank of India (RBI) ATMs based on spatial decay, H3 cybercrime risk, and velocity bursts.
           </p>
         </div>
@@ -116,9 +116,9 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
             value={topK}
             onChange={(e) => setTopK(Number(e.target.value))}
             style={{
-              backgroundColor: '#0d1322',
-              color: '#f8fafc',
-              border: '1px solid #334155',
+              backgroundColor: '#111111',
+              color: '#f5f5f5',
+              border: '1px solid #262626',
               padding: '6px 10px',
               borderRadius: '6px',
               fontSize: '0.8rem',
@@ -133,9 +133,9 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
             value={radiusKm}
             onChange={(e) => setRadiusKm(Number(e.target.value))}
             style={{
-              backgroundColor: '#0d1322',
-              color: '#f8fafc',
-              border: '1px solid #334155',
+              backgroundColor: '#111111',
+              color: '#f5f5f5',
+              border: '1px solid #262626',
               padding: '6px 10px',
               borderRadius: '6px',
               fontSize: '0.8rem',
@@ -151,14 +151,15 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
             onClick={fetchPrediction}
             disabled={loading}
             style={{
-              backgroundColor: 'rgba(0, 242, 254, 0.15)',
-              color: '#00f2fe',
-              border: '1px solid rgba(0, 242, 254, 0.4)',
+              backgroundColor: '#141414',
+              color: '#f5f5f5',
+              border: '1px solid #282828',
               padding: '6px 14px',
               borderRadius: '6px',
               fontSize: '0.8rem',
               fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.15s ease',
             }}
           >
             {loading ? 'Evaluating...' : 'Refresh Prediction'}
@@ -179,27 +180,27 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              backgroundColor: '#0d1322',
+              backgroundColor: '#111111',
               padding: '10px 16px',
               borderRadius: '6px',
               fontSize: '0.8rem',
-              color: '#94a3b8',
+              color: '#a0a0a0',
               marginBottom: '16px',
-              border: '1px solid #1e293b',
+              border: '1px solid #222222',
               flexWrap: 'wrap',
               gap: '8px',
             }}
           >
             <div>
               <span>Anchor Location: </span>
-              <strong style={{ color: '#f8fafc', fontFamily: 'monospace' }}>
+              <strong style={{ color: '#f5f5f5', fontFamily: 'monospace' }}>
                 {prediction.anchor_location.latitude.toFixed(4)}, {prediction.anchor_location.longitude.toFixed(4)}
               </strong>
-              <span style={{ color: '#64748b', marginLeft: '6px' }}>({prediction.anchor_location.source})</span>
+              <span style={{ color: '#707070', marginLeft: '6px' }}>({prediction.anchor_location.source})</span>
             </div>
             <div>
               <span>Candidates Evaluated: </span>
-              <strong style={{ color: '#00f2fe' }}>{prediction.total_candidates_evaluated} operational ATMs</strong>
+              <strong style={{ color: '#f5f5f5' }}>{prediction.total_candidates_evaluated} operational ATMs</strong>
             </div>
             <div>
               <span>Urgency Level: </span>
@@ -211,7 +212,7 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
 
           {/* ATMs Ranking List */}
           {prediction.predicted_atms.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '0.85rem' }}>
+            <div style={{ textAlign: 'center', padding: '24px', color: '#707070', fontSize: '0.85rem' }}>
               No operational RBI ATMs found within {radiusKm} km of anchor coordinates. Try increasing the search radius.
             </div>
           ) : (
@@ -226,13 +227,13 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
                       onSelectAtm?.(atm);
                     }}
                     style={{
-                      backgroundColor: isSelected ? '#17223b' : '#0d1322',
-                      border: isSelected ? '1px solid #00f2fe' : '1px solid #1e293b',
+                      backgroundColor: isSelected ? '#161616' : '#111111',
+                      border: isSelected ? '1px solid #0088ff' : '1px solid #222222',
                       borderRadius: '8px',
                       padding: '16px',
                       cursor: 'pointer',
                       transition: 'border-color 0.15s ease, transform 0.15s ease',
-                      boxShadow: isSelected ? '0 0 14px rgba(0, 242, 254, 0.2)' : 'none',
+                      boxShadow: isSelected ? '0 0 14px rgba(0, 136, 255, 0.18)' : 'none',
                     }}
                   >
                     {/* Top Row: Rank & Score */}
@@ -243,27 +244,27 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
                             width: '26px',
                             height: '26px',
                             borderRadius: '50%',
-                            backgroundColor: atm.rank === 1 ? 'rgba(0, 242, 254, 0.2)' : 'rgba(255, 255, 255, 0.08)',
-                            color: atm.rank === 1 ? '#00f2fe' : '#cbd5e1',
+                            backgroundColor: atm.rank === 1 ? '#1f1f1f' : '#141414',
+                            color: atm.rank === 1 ? '#0088ff' : '#a0a0a0',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontWeight: 800,
                             fontSize: '0.8rem',
-                            border: atm.rank === 1 ? '1px solid #00f2fe' : '1px solid #334155',
+                            border: atm.rank === 1 ? '1px solid #0088ff' : '1px solid #262626',
                           }}
                         >
                           #{atm.rank}
                         </span>
-                        <strong style={{ fontSize: '0.95rem', color: '#f8fafc' }}>{atm.bank_name}</strong>
+                        <strong style={{ fontSize: '0.95rem', color: '#f5f5f5' }}>{atm.bank_name}</strong>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '0.7rem', color: '#64748b', display: 'block' }}>Likelihood</span>
+                        <span style={{ fontSize: '0.7rem', color: '#707070', display: 'block' }}>Likelihood</span>
                         <span
                           style={{
                             fontSize: '1.05rem',
                             fontWeight: 700,
-                            color: atm.prediction_score >= 80 ? '#ef4444' : atm.prediction_score >= 60 ? '#f59e0b' : '#00f2fe',
+                            color: atm.prediction_score >= 80 ? '#ef4444' : atm.prediction_score >= 60 ? '#f59e0b' : '#10b981',
                             fontFamily: 'monospace',
                           }}
                         >
@@ -273,7 +274,7 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
                     </div>
 
                     {/* Distance & Infrastructure Details */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#a0a0a0', marginBottom: '10px' }}>
                       <span>📍 <strong>{atm.distance_km.toFixed(2)} km</strong> away</span>
                       <span>•</span>
                       <span>{atm.outlet_type?.replace(/_/g, ' ') || 'ATM'}</span>
@@ -286,11 +287,11 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
                     </div>
 
                     {/* Explanations List */}
-                    <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)', borderRadius: '6px', padding: '10px 12px' }}>
-                      <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+                    <div style={{ backgroundColor: '#070707', border: '1px solid #1a1a1a', borderRadius: '6px', padding: '10px 12px' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#707070', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
                         Tactical Rationale:
                       </span>
-                      <ul style={{ margin: '6px 0 0 16px', padding: 0, fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                      <ul style={{ margin: '6px 0 0 16px', padding: 0, fontSize: '0.75rem', color: '#d4d4d4', lineHeight: 1.5 }}>
                         {atm.explanations.map((reason, idx) => (
                           <li key={idx}>{reason}</li>
                         ))}
@@ -307,11 +308,11 @@ export const CashoutPredictionCard: React.FC<CashoutPredictionCardProps> = ({
             style={{
               marginTop: '16px',
               padding: '12px 16px',
-              backgroundColor: 'rgba(245, 158, 11, 0.08)',
+              backgroundColor: '#120f08',
               border: '1px solid rgba(245, 158, 11, 0.25)',
               borderRadius: '6px',
               fontSize: '0.72rem',
-              color: '#fcd34d',
+              color: '#fbbf24',
               lineHeight: 1.45,
             }}
           >

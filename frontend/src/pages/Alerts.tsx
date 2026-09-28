@@ -77,9 +77,9 @@ export const Alerts: React.FC = () => {
         <button
           onClick={fetchAlerts}
           style={{
-            backgroundColor: 'rgba(0, 242, 254, 0.1)',
-            color: '#00f2fe',
-            border: '1px solid rgba(0, 242, 254, 0.3)',
+            backgroundColor: '#141414',
+            color: '#f5f5f5',
+            border: '1px solid #262626',
             padding: '8px 14px',
             borderRadius: '6px',
             fontSize: '0.8rem',
@@ -97,8 +97,8 @@ export const Alerts: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          backgroundColor: '#0d1322',
-          border: '1px solid #1e293b',
+          backgroundColor: '#0a0a0a',
+          border: '1px solid #202020',
           borderRadius: '8px',
           padding: '12px 16px',
           marginBottom: '20px',
@@ -113,9 +113,9 @@ export const Alerts: React.FC = () => {
             placeholder="Search by Account Number or Alert ID..."
             style={{
               flex: 1,
-              backgroundColor: '#121a2d',
-              border: '1px solid #334155',
-              color: '#f8fafc',
+              backgroundColor: '#050505',
+              border: '1px solid #202020',
+              color: '#f5f5f5',
               borderRadius: '6px',
               padding: '8px 12px',
               fontSize: '0.85rem',
@@ -124,9 +124,9 @@ export const Alerts: React.FC = () => {
           <button
             type="submit"
             style={{
-              backgroundColor: '#1e293b',
-              color: '#cbd5e1',
-              border: '1px solid #334155',
+              backgroundColor: '#141414',
+              color: '#f5f5f5',
+              border: '1px solid #262626',
               padding: '8px 14px',
               borderRadius: '6px',
               fontSize: '0.85rem',
@@ -138,7 +138,7 @@ export const Alerts: React.FC = () => {
         </form>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Severity:</label>
+          <label style={{ fontSize: '0.75rem', color: '#a0a0a0' }}>Severity:</label>
           <select
             value={selectedSeverity}
             onChange={(e) => {
@@ -146,9 +146,9 @@ export const Alerts: React.FC = () => {
               setPage(1);
             }}
             style={{
-              backgroundColor: '#121a2d',
-              color: '#f8fafc',
-              border: '1px solid #334155',
+              backgroundColor: '#050505',
+              color: '#f5f5f5',
+              border: '1px solid #202020',
               padding: '6px 10px',
               borderRadius: '6px',
               fontSize: '0.8rem',
@@ -163,7 +163,7 @@ export const Alerts: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Status:</label>
+          <label style={{ fontSize: '0.75rem', color: '#a0a0a0' }}>Status:</label>
           <select
             value={selectedStatus}
             onChange={(e) => {
@@ -171,9 +171,9 @@ export const Alerts: React.FC = () => {
               setPage(1);
             }}
             style={{
-              backgroundColor: '#121a2d',
-              color: '#f8fafc',
-              border: '1px solid #334155',
+              backgroundColor: '#050505',
+              color: '#f5f5f5',
+              border: '1px solid #202020',
               padding: '6px 10px',
               borderRadius: '6px',
               fontSize: '0.8rem',
@@ -209,10 +209,10 @@ export const Alerts: React.FC = () => {
       )}
 
       {!loading && !error && alerts.length > 0 && (
-        <div style={{ backgroundColor: '#0d1322', border: '1px solid #1e293b', borderRadius: '10px', overflow: 'hidden' }}>
+        <div style={{ backgroundColor: '#0a0a0a', border: '1px solid #202020', borderRadius: '10px', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
             <thead>
-              <tr style={{ backgroundColor: '#121a2d', borderBottom: '1px solid #1e293b', color: '#64748b', textTransform: 'uppercase', fontSize: '0.7rem' }}>
+              <tr style={{ backgroundColor: '#050505', borderBottom: '1px solid #202020', color: '#707070', textTransform: 'uppercase', fontSize: '0.7rem' }}>
                 <th style={{ padding: '12px 16px' }}>Alert ID</th>
                 <th style={{ padding: '12px 16px' }}>Severity</th>
                 <th style={{ padding: '12px 16px' }}>Score</th>
@@ -229,32 +229,32 @@ export const Alerts: React.FC = () => {
                   key={alert.id || alert.alert_id}
                   onClick={() => navigate(`/alerts/${alert.alert_id || alert.id}`)}
                   style={{
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                    borderBottom: '1px solid #1a1a1a',
                     cursor: 'pointer',
                     transition: 'background-color 0.1s ease',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#17223b')}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#141414')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
-                  <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontWeight: 600, color: '#f8fafc' }}>
+                  <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontWeight: 600, color: '#f5f5f5' }}>
                     {alert.alert_id}
                   </td>
                   <td style={{ padding: '14px 16px' }}>
                     <Badge severity={alert.severity}>{alert.severity}</Badge>
                   </td>
-                  <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontWeight: 700, color: alert.risk_score >= 80 ? '#ef4444' : '#00f2fe' }}>
+                  <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontWeight: 700, color: alert.risk_score >= 80 ? '#ef4444' : '#0088ff' }}>
                     {alert.risk_score.toFixed(1)}
                   </td>
-                  <td style={{ padding: '14px 16px', color: '#cbd5e1' }}>
+                  <td style={{ padding: '14px 16px', color: '#a0a0a0' }}>
                     {alert.alert_type?.replace(/_/g, ' ')}
                   </td>
-                  <td style={{ padding: '14px 16px', fontFamily: 'monospace', color: '#94a3b8' }}>
+                  <td style={{ padding: '14px 16px', fontFamily: 'monospace', color: '#707070' }}>
                     {alert.account_id}
                   </td>
                   <td style={{ padding: '14px 16px' }}>
                     <Badge status={alert.status}>{alert.status}</Badge>
                   </td>
-                  <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '0.75rem' }}>
+                  <td style={{ padding: '14px 16px', color: '#707070', fontSize: '0.75rem' }}>
                     {new Date(alert.created_at).toLocaleString()}
                   </td>
                   <td style={{ padding: '14px 16px', textAlign: 'right' }}>
@@ -264,9 +264,9 @@ export const Alerts: React.FC = () => {
                         navigate(`/alerts/${alert.alert_id || alert.id}`);
                       }}
                       style={{
-                        backgroundColor: 'rgba(0, 242, 254, 0.1)',
-                        color: '#00f2fe',
-                        border: '1px solid rgba(0, 242, 254, 0.3)',
+                        backgroundColor: '#141414',
+                        color: '#f5f5f5',
+                        border: '1px solid #262626',
                         padding: '6px 12px',
                         borderRadius: '6px',
                         fontSize: '0.75rem',
@@ -289,10 +289,10 @@ export const Alerts: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 16px',
-              backgroundColor: '#121a2d',
-              borderTop: '1px solid #1e293b',
+              backgroundColor: '#050505',
+              borderTop: '1px solid #202020',
               fontSize: '0.8rem',
-              color: '#94a3b8',
+              color: '#a0a0a0',
             }}
           >
             <div>
@@ -303,9 +303,9 @@ export const Alerts: React.FC = () => {
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 style={{
-                  backgroundColor: '#0d1322',
-                  color: page <= 1 ? '#475569' : '#cbd5e1',
-                  border: '1px solid #334155',
+                  backgroundColor: '#0a0a0a',
+                  color: page <= 1 ? '#404040' : '#f5f5f5',
+                  border: '1px solid #202020',
                   padding: '4px 12px',
                   borderRadius: '4px',
                   cursor: page <= 1 ? 'not-allowed' : 'pointer',
@@ -317,9 +317,9 @@ export const Alerts: React.FC = () => {
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 style={{
-                  backgroundColor: '#0d1322',
-                  color: page >= totalPages ? '#475569' : '#cbd5e1',
-                  border: '1px solid #334155',
+                  backgroundColor: '#0a0a0a',
+                  color: page >= totalPages ? '#404040' : '#f5f5f5',
+                  border: '1px solid #202020',
                   padding: '4px 12px',
                   borderRadius: '4px',
                   cursor: page >= totalPages ? 'not-allowed' : 'pointer',

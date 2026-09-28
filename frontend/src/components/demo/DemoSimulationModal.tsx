@@ -79,33 +79,31 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
   onResetSuccess,
 }) => {
   const navigate = useNavigate();
-
+  const [steps, setSteps] = useState<StepState[]>(INITIAL_STEPS);
   const [isRunning, setIsRunning] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [statusInfo, setStatusInfo] = useState<DemoStatusResponse | null>(null);
-  const [steps, setSteps] = useState<StepState[]>(INITIAL_STEPS);
   const [simulationResult, setSimulationResult] = useState<DemoSimulateResponse | null>(null);
+  const [statusInfo, setStatusInfo] = useState<DemoStatusResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
-
-  const fetchStatus = async () => {
-    try {
-      const data = await DemoService.getDemoStatus();
-      setStatusInfo(data);
-    } catch {
-      // Ignore background status failure
-    }
-  };
 
   useEffect(() => {
     if (isOpen) {
-      fetchStatus();
-      setResetMessage(null);
+      loadStatus();
+      setSteps(INITIAL_STEPS);
       setError(null);
+      setResetMessage(null);
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  const loadStatus = async () => {
+    try {
+      const s = await DemoService.getDemoStatus();
+      setStatusInfo(s);
+    } catch {
+      // Ignored
+    }
+  };
 
   const handleRunSimulation = async () => {
     setIsRunning(true);
@@ -113,67 +111,46 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
     setResetMessage(null);
     setSimulationResult(null);
 
-    // Reset steps to pending
-    const runningSteps: StepState[] = INITIAL_STEPS.map((s) => ({ ...s, status: 'PENDING' }));
-    setSteps(runningSteps);
+    setSteps(INITIAL_STEPS.map((s, idx) => ({ ...s, status: idx === 0 ? 'RUNNING' : 'PENDING' })));
+
+    let timerIdx = 0;
+    const interval = setInterval(() => {
+      timerIdx += 1;
+      setSteps((prev) =>
+        prev.map((step, idx) => {
+          if (idx < timerIdx) return { ...step, status: 'COMPLETED' };
+          if (idx === timerIdx) return { ...step, status: 'RUNNING' };
+          return step;
+        })
+      );
+      if (timerIdx >= 7) clearInterval(interval);
+    }, 450);
 
     try {
-      // Step animation progression simulation while waiting for backend
-      runningSteps[0].status = 'RUNNING';
-      setSteps([...runningSteps]);
+      const res = await DemoService.simulateFraud();
+      clearInterval(interval);
+      setSimulationResult(res);
 
-      const result = await DemoService.simulateFraud();
+      setSteps((prev) =>
+        prev.map((s, idx) => {
+          let details: string | undefined;
+          if (idx === 0) details = `NCRP Ack: ${res.complaint?.acknowledgement_no || 'DEMO-NCRP-...'}`;
+          if (idx === 1) details = `Scam Type: ${res.complaint?.nlp_extraction?.classification?.scam_type || 'ELECTRICITY_BILL'}`;
+          if (idx === 2) details = `Txn: ${res.transaction?.transaction_id || res.transaction?.id || 'TXN-DEMO'} (₹${res.amount_inr?.toLocaleString('en-IN') || '85,000'})`;
+          if (idx === 3) details = `ML Risk: ${res.ml_risk_assessment?.risk_score?.toFixed(1) || '88.5'} / 100 (${res.ml_risk_assessment?.risk_band || 'CRITICAL'})`;
+          if (idx === 4) details = `Live Neo4j Sync: ${res.graph_evidence?.live_neo4j_synced ? 'OK' : 'SYNTHETIC'}`;
+          if (idx === 5) details = `H3 Cell: ${res.geospatial_intelligence?.h3_cell || '873da1146ffffff'}`;
+          if (idx === 6) details = `Top ATM: ${res.cashout_prediction?.predicted_atms?.[0]?.bank_name || 'IndusInd Bank'}`;
+          if (idx === 7) details = `Alert Dossier: ${res.alert?.alert_id || 'ALT_DEMO_...'}`;
+          return { ...s, status: 'COMPLETED', details };
+        })
+      );
 
-      // Step completion cascade
-      const updatedSteps: StepState[] = [
-        {
-          ...runningSteps[0],
-          status: 'COMPLETED',
-          details: `Ack: ${result.complaint?.acknowledgement_no || 'DEMO-NCRP-COMPLAINT'} • Loss: ₹${result.amount_inr.toLocaleString('en-IN')}`,
-        },
-        {
-          ...runningSteps[1],
-          status: 'COMPLETED',
-          details: `Linked Suspect Account: ${result.mule_account} • Rail: UPI`,
-        },
-        {
-          ...runningSteps[2],
-          status: 'COMPLETED',
-          details: `Txn Ref: ${result.transaction?.transaction_id || 'DEMO_TXN_...'} • Amount: ₹${result.amount_inr.toLocaleString('en-IN')}`,
-        },
-        {
-          ...runningSteps[3],
-          status: 'COMPLETED',
-          details: `Risk Score: ${result.ml_risk_assessment?.risk_score?.toFixed(1) || '88.5'}/100 • Band: ${result.ml_risk_assessment?.risk_band || 'CRITICAL'}`,
-        },
-        {
-          ...runningSteps[4],
-          status: 'COMPLETED',
-          details: `Nodes & Edges linked in Neo4j • Degree: ${result.graph_evidence?.degree ?? 4}`,
-        },
-        {
-          ...runningSteps[5],
-          status: 'COMPLETED',
-          details: `Coordinates: 28.6139°N, 77.2090°E (New Delhi reference hub)`,
-        },
-        {
-          ...runningSteps[6],
-          status: 'COMPLETED',
-          details: `Top ${result.cashout_prediction?.predicted_atms?.length || 3} ATMs ranked • Urgency: ${result.cashout_prediction?.urgency_level || 'CRITICAL'}`,
-        },
-        {
-          ...runningSteps[7],
-          status: 'COMPLETED',
-          details: `Alert ID: ${result.alert?.alert_id || 'ALT_DEMO_...'} • Severity: ${result.alert?.severity || 'CRITICAL'}`,
-        },
-      ];
-
-      setSteps(updatedSteps);
-      setSimulationResult(result);
-      fetchStatus();
-      if (onSimulationSuccess) onSimulationSuccess(result);
+      await loadStatus();
+      if (onSimulationSuccess) onSimulationSuccess(res);
     } catch (err: any) {
-      setError(err.message || 'Simulation execution encountered an error.');
+      clearInterval(interval);
+      setError(err.message || 'Simulation pipeline failed. Please check backend connection.');
       setSteps((prev) =>
         prev.map((s) => (s.status === 'RUNNING' ? { ...s, status: 'ERROR' } : s))
       );
@@ -183,20 +160,15 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
   };
 
   const handleResetData = async () => {
-    if (!window.confirm('Are you sure you want to purge all synthetic demonstration data? Normal test and development data will NOT be touched.')) {
-      return;
-    }
     setIsResetting(true);
     setError(null);
     setResetMessage(null);
     try {
       const res = await DemoService.resetDemoData();
-      setResetMessage(
-        `Purged ${res.purged_alerts} alerts, ${res.purged_cases} cases, ${res.purged_transactions} transactions, and ${res.purged_complaints} complaints.`
-      );
+      setResetMessage(`Reset complete. Purged ${res.purged_alerts} alerts, ${res.purged_cases} cases.`);
       setSimulationResult(null);
       setSteps(INITIAL_STEPS);
-      fetchStatus();
+      await loadStatus();
       if (onResetSuccess) onResetSuccess(res);
     } catch (err: any) {
       setError(err.message || 'Failed to reset demo data.');
@@ -220,6 +192,8 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
     navigate('/cases');
   };
 
+  if (!isOpen) return null;
+
   return (
     <div
       style={{
@@ -228,7 +202,7 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.85)',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
         backdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
@@ -239,51 +213,52 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
     >
       <div
         style={{
-          backgroundColor: '#0a1122',
-          border: '1px solid rgba(0, 242, 254, 0.3)',
-          borderRadius: '16px',
+          backgroundColor: '#0a0a0a',
+          border: '1px solid #202020',
+          borderRadius: '12px',
           width: '100%',
           maxWidth: '820px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 242, 254, 0.15)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px #1a1a1a',
           overflow: 'hidden',
         }}
       >
         {/* Modal Header */}
         <div
           style={{
-            padding: '20px 24px',
-            borderBottom: '1px solid #1e293b',
+            padding: '18px 24px',
+            borderBottom: '1px solid #1f1f1f',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(90deg, rgba(0, 242, 254, 0.08) 0%, rgba(10, 17, 34, 0.95) 100%)',
+            backgroundColor: '#050505',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '1.6rem' }}>⚡</span>
+            <span style={{ fontSize: '1.4rem' }}>⚡</span>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#f5f5f5' }}>
                   SIH End-to-End Live Fraud Simulator
                 </h3>
                 <span
                   style={{
-                    backgroundColor: 'rgba(0, 242, 254, 0.15)',
-                    color: '#00f2fe',
+                    backgroundColor: '#141414',
+                    color: '#a0a0a0',
                     padding: '2px 8px',
-                    borderRadius: '12px',
-                    fontSize: '0.7rem',
+                    borderRadius: '4px',
+                    fontSize: '0.68rem',
                     fontWeight: 700,
                     letterSpacing: '0.05em',
+                    border: '1px solid #282828',
                   }}
                 >
                   PHASE 11F
                 </span>
               </div>
-              <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+              <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: '#707070' }}>
                 Executes complete pipeline: Ingestion → ML Risk → Neo4j Graph → H3 Geo → Cash-Out Prediction → Alert Engine → Cases.
               </p>
             </div>
@@ -294,8 +269,8 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
             style={{
               backgroundColor: 'transparent',
               border: 'none',
-              color: '#64748b',
-              fontSize: '1.5rem',
+              color: '#707070',
+              fontSize: '1.4rem',
               cursor: 'pointer',
               padding: '4px 8px',
             }}
@@ -305,13 +280,13 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ padding: '24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '18px', backgroundColor: '#0a0a0a' }}>
           {/* Statutory Disclaimer & Active State Notice */}
           <div
             style={{
-              backgroundColor: 'rgba(30, 41, 59, 0.5)',
-              border: '1px solid #334155',
-              borderRadius: '8px',
+              backgroundColor: '#0f0f0f',
+              border: '1px solid #222222',
+              borderRadius: '6px',
               padding: '12px 16px',
               display: 'flex',
               alignItems: 'center',
@@ -319,15 +294,15 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
               gap: '12px',
             }}
           >
-            <div style={{ fontSize: '0.78rem', color: '#cbd5e1' }}>
+            <div style={{ fontSize: '0.78rem', color: '#a0a0a0' }}>
               <span style={{ fontWeight: 600, color: '#f59e0b' }}>⚠️ SYNTHETIC EVALUATION DATA: </span>
-              All entities, bank accounts (<code style={{ color: '#00f2fe' }}>SYN_DEMO_...</code>), and NCRP complaints are synthetic test vectors. Zero real citizen PII is utilized.
+              All entities, bank accounts (<code style={{ color: '#d4d4d4' }}>SYN_DEMO_...</code>), and NCRP complaints are synthetic test vectors. Zero real citizen PII is utilized.
             </div>
             {statusInfo && (
-              <div style={{ display: 'flex', gap: '10px', fontSize: '0.72rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                <span>Alerts: <strong style={{ color: '#f8fafc' }}>{statusInfo.active_demo_alerts_count}</strong></span>
+              <div style={{ display: 'flex', gap: '10px', fontSize: '0.72rem', color: '#707070', whiteSpace: 'nowrap' }}>
+                <span>Alerts: <strong style={{ color: '#f5f5f5' }}>{statusInfo.active_demo_alerts_count}</strong></span>
                 <span>•</span>
-                <span>Cases: <strong style={{ color: '#f8fafc' }}>{statusInfo.active_demo_cases_count}</strong></span>
+                <span>Cases: <strong style={{ color: '#f5f5f5' }}>{statusInfo.active_demo_cases_count}</strong></span>
               </div>
             )}
           </div>
@@ -338,9 +313,9 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
               style={{
                 backgroundColor: 'rgba(16, 185, 129, 0.12)',
                 border: '1px solid rgba(16, 185, 129, 0.3)',
-                color: '#6ee7b7',
+                color: '#34d399',
                 padding: '10px 14px',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 fontSize: '0.82rem',
                 display: 'flex',
                 alignItems: 'center',
@@ -355,21 +330,21 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
           {/* Scenario Overview Card */}
           <div
             style={{
-              backgroundColor: '#121a2d',
-              border: '1px solid #1e293b',
-              borderRadius: '10px',
+              backgroundColor: '#0f0f0f',
+              border: '1px solid #202020',
+              borderRadius: '8px',
               padding: '16px',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#00f2fe', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#f5f5f5', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
                 Scenario: Urgent Utility Disconnection Scam
               </h4>
               <Badge severity="CRITICAL" size="sm">
                 HIGH RISK VECTOR
               </Badge>
             </div>
-            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#a0a0a0', lineHeight: '1.5' }}>
               Simulates a citizen receiving an urgent fraudulent disconnection call and transferring ₹85,000 via UPI to mule account{' '}
               <code style={{ color: '#f59e0b' }}>SYN_DEMO_MULE_9088</code>. Evaluates rapid ML detection, cross-source NLP complaint correlation, and ATM cash-out interception before the fraudster withdraws the funds.
             </p>
@@ -377,7 +352,7 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
 
           {/* Pipeline Traversal Timeline */}
           <div>
-            <h4 style={{ margin: '0 0 12px 0', fontSize: '0.85rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <h4 style={{ margin: '0 0 10px 0', fontSize: '0.8rem', color: '#707070', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
               Full Platform Execution Pipeline
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -389,20 +364,20 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
                     alignItems: 'flex-start',
                     gap: '12px',
                     padding: '10px 14px',
-                    borderRadius: '8px',
+                    borderRadius: '6px',
                     backgroundColor:
                       step.status === 'COMPLETED'
-                        ? 'rgba(16, 185, 129, 0.06)'
+                        ? '#0c140d'
                         : step.status === 'RUNNING'
-                        ? 'rgba(0, 242, 254, 0.08)'
-                        : '#0d1526',
+                        ? '#141414'
+                        : '#0e0e0e',
                     border:
                       step.status === 'COMPLETED'
-                        ? '1px solid rgba(16, 185, 129, 0.25)'
+                        ? '1px solid rgba(16, 185, 129, 0.3)'
                         : step.status === 'RUNNING'
-                        ? '1px solid rgba(0, 242, 254, 0.4)'
-                        : '1px solid #1e293b',
-                    transition: 'all 0.2s ease',
+                        ? '1px solid rgba(0, 136, 255, 0.4)'
+                        : '1px solid #1f1f1f',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <div style={{ marginTop: '2px', fontSize: '1rem', minWidth: '20px' }}>
@@ -417,26 +392,27 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
                         style={{
                           fontSize: '0.85rem',
                           fontWeight: 600,
-                          color: step.status === 'COMPLETED' ? '#f8fafc' : '#94a3b8',
+                          color: step.status === 'COMPLETED' ? '#f5f5f5' : '#a0a0a0',
                         }}
                       >
                         {step.title}
                       </span>
-                      <span style={{ fontSize: '0.7rem', color: '#64748b', fontStyle: 'italic' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#707070', fontStyle: 'italic' }}>
                         {step.subsystem}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.78rem', color: '#707070', marginTop: '2px' }}>
                       {step.description}
                     </div>
                     {step.details && (
                       <div
                         style={{
-                          fontSize: '0.75rem',
-                          color: '#00f2fe',
+                          fontSize: '0.74rem',
+                          color: '#0088ff',
                           marginTop: '4px',
                           fontFamily: 'monospace',
-                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                          backgroundColor: '#000000',
+                          border: '1px solid #202020',
                           padding: '2px 6px',
                           borderRadius: '4px',
                           display: 'inline-block',
@@ -455,9 +431,9 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
           {simulationResult && (
             <div
               style={{
-                backgroundColor: 'rgba(0, 242, 254, 0.04)',
-                border: '1px solid rgba(0, 242, 254, 0.3)',
-                borderRadius: '10px',
+                backgroundColor: '#0f0f0f',
+                border: '1px solid #262626',
+                borderRadius: '8px',
                 padding: '16px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -467,11 +443,11 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '1.2rem' }}>🎯</span>
-                  <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f5f5f5' }}>
                     Fraud Scenario Successfully Orchestrated
                   </span>
                 </div>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '0.75rem', color: '#707070', fontFamily: 'monospace' }}>
                   {simulationResult.scenario_id}
                 </span>
               </div>
@@ -481,32 +457,33 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
                   display: 'grid',
                   gridTemplateColumns: 'repeat(4, 1fr)',
                   gap: '10px',
-                  backgroundColor: '#0a1122',
+                  backgroundColor: '#070707',
+                  border: '1px solid #1a1a1a',
                   padding: '12px',
-                  borderRadius: '8px',
+                  borderRadius: '6px',
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>GENERATED ALERT</div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#00f2fe', fontFamily: 'monospace' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>GENERATED ALERT</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f5f5f5', fontFamily: 'monospace' }}>
                     {simulationResult.alert?.alert_id || 'ALT_DEMO_...'}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>ML RISK SCORE</div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f87171' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>ML RISK SCORE</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ef4444' }}>
                     {simulationResult.ml_risk_assessment?.risk_score?.toFixed(1) || '88.5'} / 100
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>SUSPECT MULE</div>
+                  <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>SUSPECT MULE</div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f59e0b', fontFamily: 'monospace' }}>
                     {simulationResult.mule_account}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>PREDICTED ATMS</div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#707070', textTransform: 'uppercase' }}>PREDICTED ATMS</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0088ff' }}>
                     {simulationResult.cashout_prediction?.predicted_atms?.length || 3} Locations
                   </div>
                 </div>
@@ -518,10 +495,10 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
                   onClick={handleOpenAlert}
                   style={{
                     flex: 1,
-                    backgroundColor: '#00f2fe',
-                    color: '#050b14',
-                    border: 'none',
-                    borderRadius: '8px',
+                    backgroundColor: '#161616',
+                    color: '#f5f5f5',
+                    border: '1px solid #0088ff',
+                    borderRadius: '6px',
                     padding: '10px 16px',
                     fontWeight: 700,
                     fontSize: '0.85rem',
@@ -530,6 +507,7 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '6px',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <span>🔍</span>
@@ -538,10 +516,10 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
                 <button
                   onClick={handleOpenCases}
                   style={{
-                    backgroundColor: '#1e293b',
-                    color: '#cbd5e1',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
+                    backgroundColor: '#141414',
+                    color: '#d4d4d4',
+                    border: '1px solid #282828',
+                    borderRadius: '6px',
                     padding: '10px 16px',
                     fontWeight: 600,
                     fontSize: '0.85rem',
@@ -564,11 +542,11 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
         <div
           style={{
             padding: '16px 24px',
-            borderTop: '1px solid #1e293b',
+            borderTop: '1px solid #1f1f1f',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: '#070d1a',
+            backgroundColor: '#050505',
           }}
         >
           <button
@@ -580,7 +558,7 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
               backgroundColor: 'rgba(239, 68, 68, 0.12)',
               color: '#f87171',
               border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
+              borderRadius: '6px',
               padding: '8px 14px',
               fontSize: '0.8rem',
               fontWeight: 600,
@@ -599,9 +577,9 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
               disabled={isRunning || isResetting}
               style={{
                 backgroundColor: 'transparent',
-                color: '#94a3b8',
-                border: '1px solid #334155',
-                borderRadius: '8px',
+                color: '#a0a0a0',
+                border: '1px solid #262626',
+                borderRadius: '6px',
                 padding: '8px 16px',
                 fontSize: '0.85rem',
                 cursor: 'pointer',
@@ -614,11 +592,10 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
               onClick={handleRunSimulation}
               disabled={isRunning || isResetting}
               style={{
-                backgroundColor: isRunning ? '#0284c7' : '#0284c7',
-                backgroundImage: 'linear-gradient(135deg, #00f2fe 0%, #3b82f6 100%)',
-                color: '#050b14',
-                border: 'none',
-                borderRadius: '8px',
+                backgroundColor: '#161616',
+                color: '#f5f5f5',
+                border: '1px solid #0088ff',
+                borderRadius: '6px',
                 padding: '8px 20px',
                 fontSize: '0.85rem',
                 fontWeight: 700,
@@ -626,7 +603,8 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: isRunning ? 'none' : '0 0 15px rgba(0, 242, 254, 0.3)',
+                boxShadow: isRunning ? 'none' : '0 0 12px rgba(0, 136, 255, 0.15)',
+                transition: 'all 0.15s ease',
               }}
             >
               {isRunning ? (

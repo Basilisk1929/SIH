@@ -101,13 +101,13 @@ export const Map: React.FC = () => {
             className="btn-action"
             onClick={() => setViewMode('HOTSPOTS')}
             style={{
-              background: viewMode === 'HOTSPOTS' ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.06)',
-              color: viewMode === 'HOTSPOTS' ? '#070a12' : 'var(--text-primary)',
-              fontWeight: viewMode === 'HOTSPOTS' ? 700 : 500,
+              background: viewMode === 'HOTSPOTS' ? '#0088ff' : '#141414',
+              color: viewMode === 'HOTSPOTS' ? '#ffffff' : '#a0a0a0',
+              fontWeight: 600,
               padding: '8px 14px',
               borderRadius: 6,
               fontSize: '0.82rem',
-              border: 'none',
+              border: viewMode === 'HOTSPOTS' ? '1px solid #0088ff' : '1px solid #202020',
               cursor: 'pointer',
             }}
           >
@@ -117,13 +117,13 @@ export const Map: React.FC = () => {
             className="btn-action"
             onClick={() => setViewMode('ATMS')}
             style={{
-              background: viewMode === 'ATMS' ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.06)',
-              color: viewMode === 'ATMS' ? '#070a12' : 'var(--text-primary)',
-              fontWeight: viewMode === 'ATMS' ? 700 : 500,
+              background: viewMode === 'ATMS' ? '#0088ff' : '#141414',
+              color: viewMode === 'ATMS' ? '#ffffff' : '#a0a0a0',
+              fontWeight: 600,
               padding: '8px 14px',
               borderRadius: 6,
               fontSize: '0.82rem',
-              border: 'none',
+              border: viewMode === 'ATMS' ? '1px solid #0088ff' : '1px solid #202020',
               cursor: 'pointer',
             }}
           >
@@ -133,13 +133,13 @@ export const Map: React.FC = () => {
             className="btn-action"
             onClick={() => setViewMode('CASHOUT')}
             style={{
-              background: viewMode === 'CASHOUT' ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.06)',
-              color: viewMode === 'CASHOUT' ? '#070a12' : 'var(--text-primary)',
-              fontWeight: viewMode === 'CASHOUT' ? 700 : 500,
+              background: viewMode === 'CASHOUT' ? '#0088ff' : '#141414',
+              color: viewMode === 'CASHOUT' ? '#ffffff' : '#a0a0a0',
+              fontWeight: 600,
               padding: '8px 14px',
               borderRadius: 6,
               fontSize: '0.82rem',
-              border: 'none',
+              border: viewMode === 'CASHOUT' ? '1px solid #0088ff' : '1px solid #202020',
               cursor: 'pointer',
             }}
           >
@@ -244,8 +244,8 @@ export const Map: React.FC = () => {
             minHeight: 560,
             overflow: 'hidden',
             padding: 0,
-            background: 'radial-gradient(circle at center, #0f172a 0%, #070a12 100%)',
-            border: '1px solid var(--border-subtle)',
+            background: '#050505',
+            border: '1px solid #202020',
             borderRadius: 10,
             cursor: isDragging ? 'grabbing' : 'grab',
           }}
@@ -334,7 +334,7 @@ export const Map: React.FC = () => {
                       {/* Core marker */}
                       <circle
                         r="8"
-                        fill={isSelected ? '#00f2fe' : '#ef4444'}
+                        fill={isSelected ? '#0088ff' : '#ef4444'}
                         stroke="#fff"
                         strokeWidth="1.5"
                       />

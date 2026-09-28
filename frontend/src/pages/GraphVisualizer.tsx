@@ -50,8 +50,8 @@ export const GraphVisualizer: React.FC = () => {
         {/* Visual Mock representation of Graph Network for Prototype Demonstration */}
         <div
           style={{
-            background: 'radial-gradient(circle at center, #0f172a 0%, #070a12 100%)',
-            border: '1px dashed var(--border-subtle)',
+            background: '#050505',
+            border: '1px solid #202020',
             borderRadius: 8,
             padding: 32,
             minHeight: 340,
@@ -65,44 +65,44 @@ export const GraphVisualizer: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
             {/* Victim Origin */}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444' }}>
+              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444' }}>
                 <div style={{ fontSize: '0.75rem', color: '#fca5a5' }}>ORIGIN VICTIM</div>
                 <strong style={{ fontFamily: 'var(--font-mono)' }}>VIC_MUMBAI_01</strong>
               </div>
             </div>
 
-            <div style={{ color: 'var(--accent-cyan)', fontSize: '1.2rem' }}>—[UPI ₹50,000]→</div>
+            <div style={{ color: '#a0a0a0', fontSize: '1.2rem' }}>—[UPI ₹50,000]→</div>
 
             {/* Layer 1 Mule */}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(245, 158, 11, 0.2)', border: '1px solid #f59e0b' }}>
+              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid #f59e0b' }}>
                 <div style={{ fontSize: '0.75rem', color: '#fcd34d' }}>LAYER-1 MULE</div>
                 <strong style={{ fontFamily: 'var(--font-mono)' }}>{targetAccount}</strong>
               </div>
             </div>
 
-            <div style={{ color: 'var(--accent-cyan)', fontSize: '1.2rem' }}>—[IMPS ₹48,000 (3 min)]→</div>
+            <div style={{ color: '#a0a0a0', fontSize: '1.2rem' }}>—[IMPS ₹48,000 (3 min)]→</div>
 
             {/* Layer 2 Distributor */}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(99, 102, 241, 0.2)', border: '1px solid #6366f1' }}>
+              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(99, 102, 241, 0.15)', border: '1px solid #6366f1' }}>
                 <div style={{ fontSize: '0.75rem', color: '#c7d2fe' }}>LAYER-2 MULE</div>
                 <strong style={{ fontFamily: 'var(--font-mono)' }}>MULE_L2_SYN_09</strong>
               </div>
             </div>
 
-            <div style={{ color: 'var(--accent-cyan)', fontSize: '1.2rem' }}>—[NEFT ₹46,500]→</div>
+            <div style={{ color: '#a0a0a0', fontSize: '1.2rem' }}>—[NEFT ₹46,500]→</div>
 
             {/* Layer 3 Cashout */}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981' }}>
+              <div style={{ padding: '16px 20px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981' }}>
                 <div style={{ fontSize: '0.75rem', color: '#6ee7b7' }}>CASHOUT / CRYPTO GATEWAY</div>
                 <strong style={{ fontFamily: 'var(--font-mono)' }}>EXCHANGE_DEPOSIT_ACC</strong>
               </div>
             </div>
           </div>
 
-          <div style={{ marginTop: 24, padding: 12, borderRadius: 6, background: 'rgba(0, 242, 254, 0.05)', border: '1px solid rgba(0, 242, 254, 0.2)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+          <div style={{ marginTop: 24, padding: 12, borderRadius: 6, background: '#141414', border: '1px solid #202020', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
             ⚡ <strong>Detection Rule Fired:</strong> Rapid pass-through velocity (&lt; 5 minutes per hop) across 3 accounts sharing device IMEI <code>8630910482103</code>.
           </div>
         </div>
