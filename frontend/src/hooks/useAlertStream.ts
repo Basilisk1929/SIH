@@ -44,7 +44,7 @@ export function useAlertStream(options: AlertStreamOptions = {}) {
         }
         if (!wsUrl) {
           const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-          const host = window.location.port === '5173' ? '127.0.0.1:8000' : window.location.host;
+          const host = window.location.host;
           wsUrl = `${protocol}//${host}/alerts/ws`;
         }
       }
