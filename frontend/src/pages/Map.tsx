@@ -35,6 +35,7 @@ export const Map: React.FC = () => {
   // Leaflet map refs
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const hasInitialFitRef = useRef<boolean>(false);
 
   // Layer groups
   const h3LayerRef = useRef<L.GeoJSON | null>(null);
@@ -96,7 +97,12 @@ export const Map: React.FC = () => {
       let loadedClusters: SpatialHotspotCluster[] = [];
 
       if (hotspotsRes.status === 'fulfilled' && hotspotsRes.value?.clusters) {
-        loadedClusters = hotspotsRes.value.clusters;
+        loadedClusters = (hotspotsRes.value.clusters as any[]).map((c: any) => ({
+          ...c,
+          incident_count: c.incident_count ?? c.point_count ?? 0,
+          total_loss_inr: c.total_loss_inr ?? c.total_amount_inr ?? 0,
+          reference_hub_name: c.reference_hub_name || c.nearest_reference_hub || `Cyber Hub #${c.cluster_id}`,
+        }));
         setClusters(loadedClusters);
       } else {
         throw new Error('Geospatial intelligence temporarily unavailable.');
@@ -161,9 +167,15 @@ export const Map: React.FC = () => {
     }
   }, []);
 
-  // 2. Initialize Leaflet Map
+  // 2. Initialize Leaflet Map (container is permanently mounted in DOM)
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstanceRef.current) return;
+    if (!mapContainerRef.current) return;
+    if (mapInstanceRef.current) return;
+
+    // Clear stale Leaflet container id if remounting
+    if ((mapContainerRef.current as any)._leaflet_id) {
+      delete (mapContainerRef.current as any)._leaflet_id;
+    }
 
     // Center on India National Corridor
     const map = L.map(mapContainerRef.current, {
@@ -183,6 +195,7 @@ export const Map: React.FC = () => {
     });
 
     tileLayer.on('tileerror', () => {
+      console.warn('CartoDB tile loading warning — geospatial intelligence remains available.');
       setTileError(true);
     });
 
@@ -197,10 +210,34 @@ export const Map: React.FC = () => {
 
     mapInstanceRef.current = map;
 
+    // Trigger initial invalidateSize after DOM layout stabilizes
+    const initTimer = setTimeout(() => {
+      map.invalidateSize();
+    }, 150);
+
     return () => {
+      clearTimeout(initTimer);
       map.remove();
       mapInstanceRef.current = null;
     };
+  }, []);
+
+  // Recalculate dimensions on window resize and after data loads
+  useEffect(() => {
+    if (!loading && mapInstanceRef.current) {
+      const timer = setTimeout(() => {
+        mapInstanceRef.current?.invalidateSize();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      mapInstanceRef.current?.invalidateSize();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // 3. Render H3 Hexagonal Risk Polygons
@@ -326,6 +363,16 @@ export const Map: React.FC = () => {
       });
       radiusLayerRef.current.addLayer(radiusCircle);
     }
+
+    // Auto-fit bounds on initial cluster load
+    if (!hasInitialFitRef.current && filteredClusters.length > 0 && mapInstanceRef.current) {
+      const latLngs = filteredClusters.map((c) => [c.centroid_lat, c.centroid_lng] as [number, number]);
+      const bounds = L.latLngBounds(latLngs);
+      if (bounds.isValid()) {
+        mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+        hasInitialFitRef.current = true;
+      }
+    }
   }, [clusters, selectedCluster, severityFilter, handleSelectCluster]);
 
   // 5. Render RBI ATM Proximity Markers
@@ -424,6 +471,13 @@ export const Map: React.FC = () => {
     }
   }, [predictions, viewMode, selectedCluster]);
 
+  // Filtered clusters by severity
+  const filteredClusters = clusters.filter((c) => {
+    if (severityFilter === 'ALL') return true;
+    const sev = getClusterSeverity(c);
+    return sev === severityFilter;
+  });
+
   // Compact Map Controls Handlers
   const handleZoomIn = () => {
     mapInstanceRef.current?.zoomIn();
@@ -434,12 +488,15 @@ export const Map: React.FC = () => {
   };
 
   const handleResetView = () => {
-    mapInstanceRef.current?.setView([22.5937, 78.9629], 5, { animate: true });
+    if (!mapInstanceRef.current) return;
+    mapInstanceRef.current.setView([22.5937, 78.9629], 5, { animate: true });
   };
 
   const handleFitThreats = () => {
-    if (!mapInstanceRef.current || clusters.length === 0) return;
-    const latLngs = clusters.map((c) => [c.centroid_lat, c.centroid_lng] as [number, number]);
+    if (!mapInstanceRef.current) return;
+    const target = filteredClusters.length > 0 ? filteredClusters : clusters;
+    if (target.length === 0) return;
+    const latLngs = target.map((c) => [c.centroid_lat, c.centroid_lng] as [number, number]);
     const bounds = L.latLngBounds(latLngs);
     if (bounds.isValid()) {
       mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], animate: true });
@@ -604,152 +661,205 @@ export const Map: React.FC = () => {
             borderRadius: 10,
           }}
         >
-          {loading ? (
-            <LoadingSpinner text="Loading geospatial intelligence..." minHeight={560} />
-          ) : error ? (
-            <div style={{ padding: 40 }}>
+          {/* Map DOM Element — Permanently mounted so Leaflet initializes reliably on mount */}
+          <div
+            ref={mapContainerRef}
+            id="leaflet-threat-map"
+            style={{
+              width: '100%',
+              height: '100%',
+              minHeight: 560,
+              backgroundColor: '#050505',
+            }}
+          />
+
+          {/* Compact Map Controls [ + ] [ − ] [ Reset ] [ Fit Threats ] */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 14,
+              right: 14,
+              zIndex: 1000,
+              display: 'flex',
+              gap: 6,
+              background: 'rgba(10, 10, 10, 0.88)',
+              padding: 4,
+              borderRadius: 8,
+              border: '1px solid #262626',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <button
+              className="btn-action"
+              onClick={handleZoomIn}
+              style={{ padding: '4px 9px', fontSize: '0.85rem', minWidth: 28 }}
+              title="Zoom In"
+            >
+              +
+            </button>
+            <button
+              className="btn-action"
+              onClick={handleZoomOut}
+              style={{ padding: '4px 9px', fontSize: '0.85rem', minWidth: 28 }}
+              title="Zoom Out"
+            >
+              −
+            </button>
+            <button
+              className="btn-action"
+              onClick={handleResetView}
+              style={{ padding: '4px 10px', fontSize: '0.78rem' }}
+              title="Reset View to National Extent"
+            >
+              Reset
+            </button>
+            <button
+              className="btn-action"
+              onClick={handleFitThreats}
+              style={{ padding: '4px 10px', fontSize: '0.78rem' }}
+              title="Fit All Threats"
+            >
+              Fit Threats
+            </button>
+          </div>
+
+          {/* H3 Risk Legend */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              left: 20,
+              background: 'rgba(10, 10, 10, 0.88)',
+              border: '1px solid #262626',
+              borderRadius: 6,
+              padding: '8px 12px',
+              fontSize: '0.74rem',
+              color: '#d4d4d4',
+              zIndex: 1000,
+              backdropFilter: 'blur(4px)',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.8)',
+            }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: 4, letterSpacing: '0.5px', color: '#ffffff' }}>
+              H3 RISK
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#10b981', fontSize: '0.85rem' }}>●</span> Low
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#f59e0b', fontSize: '0.85rem' }}>●</span> Medium
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#f97316', fontSize: '0.85rem' }}>●</span> High
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#ef4444', fontSize: '0.85rem' }}>●</span> Critical
+              </div>
+            </div>
+          </div>
+
+          {/* Map Tile Fallback Notice */}
+          {tileError && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 14,
+                left: 14,
+                background: 'rgba(245, 158, 11, 0.18)',
+                border: '1px solid #f59e0b',
+                color: '#fbbf24',
+                padding: '6px 12px',
+                borderRadius: 6,
+                fontSize: '0.74rem',
+                zIndex: 1000,
+                fontWeight: 600,
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              Map tiles unavailable — geospatial intelligence data is still available.
+            </div>
+          )}
+
+          {/* Top-Left Coverage Badge */}
+          {!tileError && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 14,
+                left: 14,
+                background: 'rgba(7, 10, 18, 0.85)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 6,
+                padding: '5px 10px',
+                fontSize: '0.74rem',
+                color: 'var(--text-secondary)',
+                zIndex: 1000,
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              India National Cybercrime Corridor • {filteredClusters.length} of {clusters.length} DBSCAN Clusters Active
+            </div>
+          )}
+
+          {/* Empty Filter Notification */}
+          {!loading && !error && filteredClusters.length === 0 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 54,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 1001,
+                background: 'rgba(15, 15, 15, 0.92)',
+                border: '1px solid #333333',
+                borderRadius: 8,
+                padding: '8px 16px',
+                color: '#e5e5e5',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.8)',
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              No geospatial events available for the current filters.
+            </div>
+          )}
+
+          {/* Loading Overlay */}
+          {loading && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 1002,
+                background: 'rgba(5, 5, 5, 0.82)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(3px)',
+              }}
+            >
+              <LoadingSpinner text="Loading geospatial intelligence..." minHeight={200} />
+            </div>
+          )}
+
+          {/* Error Overlay */}
+          {error && !loading && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 1002,
+                background: 'rgba(5, 5, 5, 0.9)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 40,
+              }}
+            >
               <ErrorMessage message={error} onRetry={loadGeospatialData} />
             </div>
-          ) : (
-            <>
-              {/* Map DOM Element */}
-              <div
-                ref={mapContainerRef}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: '#050505',
-                }}
-              />
-
-              {/* Compact Map Controls [ + ] [ − ] [ Reset ] [ Fit Threats ] */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 14,
-                  right: 14,
-                  zIndex: 1000,
-                  display: 'flex',
-                  gap: 6,
-                  background: 'rgba(10, 10, 10, 0.88)',
-                  padding: 4,
-                  borderRadius: 8,
-                  border: '1px solid #262626',
-                  backdropFilter: 'blur(4px)',
-                }}
-              >
-                <button
-                  className="btn-action"
-                  onClick={handleZoomIn}
-                  style={{ padding: '4px 9px', fontSize: '0.85rem', minWidth: 28 }}
-                  title="Zoom In"
-                >
-                  +
-                </button>
-                <button
-                  className="btn-action"
-                  onClick={handleZoomOut}
-                  style={{ padding: '4px 9px', fontSize: '0.85rem', minWidth: 28 }}
-                  title="Zoom Out"
-                >
-                  −
-                </button>
-                <button
-                  className="btn-action"
-                  onClick={handleResetView}
-                  style={{ padding: '4px 10px', fontSize: '0.78rem' }}
-                  title="Reset View to National Extent"
-                >
-                  Reset
-                </button>
-                <button
-                  className="btn-action"
-                  onClick={handleFitThreats}
-                  style={{ padding: '4px 10px', fontSize: '0.78rem' }}
-                  title="Fit All Threats"
-                >
-                  Fit Threats
-                </button>
-              </div>
-
-              {/* H3 Risk Legend */}
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 20,
-                  left: 20,
-                  background: 'rgba(10, 10, 10, 0.88)',
-                  border: '1px solid #262626',
-                  borderRadius: 6,
-                  padding: '8px 12px',
-                  fontSize: '0.74rem',
-                  color: '#d4d4d4',
-                  zIndex: 1000,
-                  backdropFilter: 'blur(4px)',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.8)',
-                }}
-              >
-                <div style={{ fontWeight: 700, marginBottom: 4, letterSpacing: '0.5px', color: '#ffffff' }}>
-                  H3 RISK
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ color: '#10b981', fontSize: '0.85rem' }}>●</span> Low
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ color: '#f59e0b', fontSize: '0.85rem' }}>●</span> Medium
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ color: '#f97316', fontSize: '0.85rem' }}>●</span> High
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ color: '#ef4444', fontSize: '0.85rem' }}>●</span> Critical
-                  </div>
-                </div>
-              </div>
-
-              {/* Map Tile Fallback Notice */}
-              {tileError && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 14,
-                    left: 14,
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    border: '1px solid #f59e0b',
-                    color: '#fbbf24',
-                    padding: '6px 12px',
-                    borderRadius: 6,
-                    fontSize: '0.74rem',
-                    zIndex: 1000,
-                    fontWeight: 600,
-                  }}
-                >
-                  Map tiles unavailable — geospatial data remains available.
-                </div>
-              )}
-
-              {/* Top-Left Coverage Badge */}
-              {!tileError && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 14,
-                    left: 14,
-                    background: 'rgba(7, 10, 18, 0.85)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 6,
-                    padding: '5px 10px',
-                    fontSize: '0.74rem',
-                    color: 'var(--text-secondary)',
-                    zIndex: 1000,
-                    backdropFilter: 'blur(4px)',
-                  }}
-                >
-                  India National Cybercrime Corridor • {clusters.length} DBSCAN Clusters Active
-                </div>
-              )}
-            </>
           )}
         </div>
 

@@ -495,3 +495,11 @@ tr:hover td {
   }
 }
 
+/* Custom Leaflet Marker Cleanups — Zero white borders or backgrounds */
+.custom-cluster-marker,
+.custom-atm-marker,
+.custom-pred-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
