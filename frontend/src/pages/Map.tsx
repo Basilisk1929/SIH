@@ -186,16 +186,15 @@ export const Map: React.FC = () => {
       maxZoom: 18,
     });
 
-    // Dark Matter Free Tiles (CartoDB / OpenStreetMap, ₹0 API key)
-    const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap Free Basemap (100% ₹0, zero watermark, no API key required)
+    const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
     });
 
     tileLayer.on('tileerror', () => {
-      console.warn('CartoDB tile loading warning — geospatial intelligence remains available.');
+      console.warn('OpenStreetMap tile loading warning — geospatial intelligence remains available.');
       setTileError(true);
     });
 
