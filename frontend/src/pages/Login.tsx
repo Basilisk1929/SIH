@@ -93,11 +93,35 @@ export const Login: React.FC = () => {
         minHeight: '100vh',
         backgroundColor: '#000000',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
+        padding: '32px 20px',
       }}
     >
+      {/* Brand Header — directly on OLED-black #000000 background, zero box/card around the logo */}
+      <div style={{ textAlign: 'center', marginBottom: '22px', width: '100%', maxWidth: '460px' }}>
+        <img
+          src="/cybershield-logo.png"
+          alt="CyberShield Official Logo"
+          style={{
+            width: '180px',
+            maxWidth: '85%',
+            height: 'auto',
+            margin: '0 auto 14px auto',
+            display: 'block',
+            objectFit: 'contain',
+            background: 'transparent',
+          }}
+        />
+        <h1 style={{ fontSize: '1.45rem', color: '#f5f5f5', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+          CyberShield-Intel
+        </h1>
+        <p style={{ fontSize: '0.82rem', color: '#a0a0a0', margin: '4px 0 0 0' }}>
+          Financial Cybercrime Intelligence & Mule Network Triage
+        </p>
+      </div>
+
       <div
         style={{
           width: '100%',
@@ -105,32 +129,10 @@ export const Login: React.FC = () => {
           backgroundColor: '#0a0a0a',
           border: '1px solid #202020',
           borderRadius: '12px',
-          padding: '36px 32px',
+          padding: '28px 28px',
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px #161616',
         }}
       >
-        {/* Official Brand Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <img
-            src="/cybershield-logo.png"
-            alt="CyberShield Official Logo"
-            style={{
-              width: '160px',
-              height: 'auto',
-              maxHeight: '128px',
-              margin: '0 auto 12px auto',
-              display: 'block',
-              objectFit: 'contain',
-            }}
-          />
-          <h2 style={{ fontSize: '1.35rem', color: '#f5f5f5', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
-            CyberShield-Intel
-          </h2>
-          <p style={{ fontSize: '0.8rem', color: '#a0a0a0', margin: '4px 0 0 0' }}>
-            Financial Cybercrime Intelligence & Mule Network Triage
-          </p>
-        </div>
-
         {/* Evaluation Banner & Render Free-Tier Notice */}
         <div
           style={{
