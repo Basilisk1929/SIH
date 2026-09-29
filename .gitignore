@@ -68,6 +68,7 @@ lerna-debug.log*
 frontend/dist/
 frontend/dist-ssr/
 *.local
+.vercel/
 
 # Editor & OS artifacts
 .DS_Store
